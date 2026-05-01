@@ -57,10 +57,10 @@ SAIDA ESPERADA
 Running on http://127.0.0.1:10000
 Running on http://SEU-IP:10000
 
-Em outro terminal:
+### 5. Em outro terminal:
 ### cloudflared tunnel --url http://127.0.0.1:10000 --protocol http2
 
-Para validar as informações:
+### 6. Para validar as informações:
 ### ls -la fotos
 
 ```bash
