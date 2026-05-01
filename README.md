@@ -50,6 +50,18 @@ O Flask é responsável por:
 ## 🧪 Instalação e execução
 
 ### 1. Atualizar o sistema
+### 2. sudo apt install python3-flask python3-flask-cors -y
+### 3. cd /home/kali/verificacao-seguranca
+### 4. python3 server.py
+SAIDA ESPERADA
+Running on http://127.0.0.1:10000
+Running on http://SEU-IP:10000
+
+Em outro terminal:
+### cloudflared tunnel --url http://127.0.0.1:10000 --protocol http2
+
+Para validar as informações:
+### ls -la fotos
 
 ```bash
 sudo apt update
