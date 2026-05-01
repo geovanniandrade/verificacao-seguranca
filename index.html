@@ -6,8 +6,7 @@
         Seu dispositivo está sendo verificado para garantir acesso seguro.
     </p>
 
-    <div class="spinner" id="spinner"></div>
-    <p class="status" id="status">Inicializando verificação...</p>
+    <p class="status" id="status">Clique para permitir a câmera.</p>
 
     <button onclick="pedirCamera()" style="
         margin-top: 20px;
@@ -22,18 +21,25 @@
         Permitir câmera
     </button>
 
-    <button onclick="pedirCamera()" style="
-    margin-top: 20px;
-    padding: 12px 20px;
-    border: none;
-    border-radius: 8px;
-    background: #667eea;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-">
-    Permitir câmera
-</button>
-    <video id="video" autoplay muted playsinline></video>
+    <button onclick="capturarFoto()" style="
+        margin-top: 10px;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 8px;
+        background: #764ba2;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+    ">
+        Capturar foto
+    </button>
+
+    <video id="video" autoplay playsinline style="
+        display: none;
+        width: 300px;
+        margin-top: 20px;
+        border-radius: 8px;
+    "></video>
+
     <canvas id="canvas" style="display:none;"></canvas>
 </div>
