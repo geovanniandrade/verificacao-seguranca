@@ -68,12 +68,22 @@ def evento():
             "platform": data.get("platform", "N/A"),
             "language": data.get("language", "N/A"),
             "timezone": data.get("timezone", "N/A"),
+
+            # Dados extras de localização, quando existirem
+            "latitude": data.get("latitude", "N/A"),
+            "longitude": data.get("longitude", "N/A"),
+            "accuracy": data.get("accuracy", "N/A"),
+            "google_maps": data.get("google_maps", "N/A"),
         }
 
-        with open("logs/eventos.jsonl", "a") as f:
+        with open("logs/eventos.jsonl", "a", encoding="utf-8") as f:
             f.write(json.dumps(evento_log, ensure_ascii=False) + "\n")
 
         print(f"\n[+] EVENTO REGISTRADO: {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
+
+        if tipo == "localizacao" and evento_log["latitude"] != "N/A":
+            print(f"[+] Localização: {evento_log['latitude']}, {evento_log['longitude']}")
+            print(f"[+] Google Maps: {evento_log['google_maps']}")
 
         return jsonify({"status": "ok"}), 200
 
@@ -95,3 +105,4 @@ if __name__ == "__main__":
 
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)
+   
