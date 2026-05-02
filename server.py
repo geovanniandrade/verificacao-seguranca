@@ -16,6 +16,7 @@ BANNER = r"""
         🔐 GuiPhish Awareness Lab
         🎣 Security Awareness Toolkit
         🐧 Running on Kali Linux
+        CRIADO POR: Geovanni Andrade
 """
 
 app = Flask(__name__)
