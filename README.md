@@ -67,6 +67,7 @@ sudo apt install python3-flask python3-flask-cors -y
 
 ### 3. Acessar o projeto
 ```bash
+git clone https://github.com/geovanniandrade/verificacao-seguranca.git
 cd /home/kali/verificacao-seguranca
 ```
 ### 4. Executar o servidor Flask
