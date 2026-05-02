@@ -149,9 +149,20 @@ function testarLocalizacao() {
 
     statusText.textContent = "Solicitando permissão de localização...";
 
-    navigator.geolocation.getCurrentPosition(async () => {
+    navigator.geolocation.getCurrentPosition(async (position) => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+        const accuracy = position.coords.accuracy;
+
+        statusText.innerHTML =
+            "Localização obtida ✅<br>" +
+            "Latitude: " + lat + "<br>" +
+            "Longitude: " + lon + "<br>" +
+            "Precisão: " + Math.round(accuracy) + " metros<br><br>" +
+            "<a href='https://www.google.com/maps?q=" + lat + "," + lon + "' target='_blank' style='color:#00e676; font-weight:bold;'>Abrir no Google Maps</a>";
+
         await registrarEvento("localizacao", "permissao_localizacao", "permitida");
-        statusText.textContent = "Permissão de localização concedida ✅";
+
     }, async (error) => {
         await registrarEvento("localizacao", "permissao_localizacao", "negada");
         statusText.textContent = "Permissão de localização negada ❌";
