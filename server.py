@@ -137,6 +137,11 @@ def index():
     return send_file("index.html")
 
 
+@app.route("/email")
+def email_page():
+    return send_file("email.html")
+
+
 @app.route("/evento", methods=["POST"])
 def evento():
     try:
