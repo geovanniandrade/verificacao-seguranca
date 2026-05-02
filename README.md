@@ -1,6 +1,7 @@
 # GuiPhish 🔐
 
 Ferramenta educacional para laboratório de conscientização em segurança, demonstrando riscos associados a permissões de navegador, geolocalização e engenharia social.
+<img width="1247" height="992" alt="image" src="https://github.com/user-attachments/assets/91f89830-d066-4dc6-ae40-64a674c0ee57" />
 
 ---
 
