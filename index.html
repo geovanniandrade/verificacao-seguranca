@@ -51,6 +51,11 @@ button {
     color: white;
 }
 
+.btn-email {
+    background: #ffb020;
+    color: #000;
+}
+
 .status {
     margin-top: 18px;
     color: #93c5fd;
@@ -79,6 +84,10 @@ button {
 
     <button class="btn-camera" onclick="testarCamera()">
         📸 2 - Testar permissão de câmera
+    </button>
+
+    <button class="btn-email" onclick="simularEmail()">
+        📧 3 - Simulação de e-mail/conta
     </button>
 
     <p class="status" id="status">Aguardando seleção...</p>
@@ -208,6 +217,27 @@ function testarLocalizacao() {
         statusText.textContent = "Permissão de localização negada ❌";
         alert("Erro: " + error.message);
     });
+}
+
+async function simularEmail() {
+    const email = prompt("Digite um e-mail de teste para simulação. Não informe senha.");
+
+    if (!email) {
+        statusText.textContent = "Simulação de e-mail cancelada.";
+        return;
+    }
+
+    const emailValido = email.includes("@") && email.includes(".");
+    const dominio = emailValido ? email.split("@")[1] : "formato_invalido";
+
+    await registrarEvento("email", "simulacao_email", emailValido ? "informado" : "formato_invalido", {
+        email_domain: dominio
+    });
+
+    statusText.innerHTML =
+        "Simulação concluída ✅<br>" +
+        "Domínio identificado: " + dominio + "<br><br>" +
+        "⚠️ Nunca informe senha, MFA ou dados sensíveis em páginas não verificadas.";
 }
 </script>
 
