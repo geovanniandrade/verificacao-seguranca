@@ -66,12 +66,15 @@ sudo apt install python3-flask python3-flask-cors -y
 ```
 
 ### 3. Acessar o projeto
+```bash
 cd /home/kali/verificacao-seguranca
-
+```
 ### 4. Executar o servidor Flask
+```bash
 python3 server.py
-
+```
 ### 5. Escolher uma opção no menu
+```bash
 1) 📸 Testar permissão de câmera
 2) 🌍 Testar permissão de localização
 3) 📊 Dashboard / visualizar logs
@@ -80,6 +83,7 @@ python3 server.py
 6) 📧 Simulação de e-mail/conta
 7) 🛑 Sair
 6. Saída esperada
+```
 ```bash
 Running on http://127.0.0.1:10000
 Running on http://SEU-IP:10000
@@ -114,8 +118,9 @@ Para abrir a pasta:
 xdg-open fotos
 
 ### 🌍 Validar logs e localização
+```bash
 tail -n 10 logs/eventos.jsonl
-
+```
 ### 🧾 Gerar relatório do lab
 
 No menu da ferramenta, selecione:
