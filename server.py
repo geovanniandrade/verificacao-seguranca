@@ -166,11 +166,14 @@ def evento():
         with open("logs/eventos.jsonl", "a", encoding="utf-8") as f:
             f.write(json.dumps(evento_log, ensure_ascii=False) + "\n")
 
-        print(f"\n[+] EVENTO REGISTRADO: {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
+               print(f"\n[+] EVENTO REGISTRADO: {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
 
         if tipo == "localizacao" and evento_log["latitude"] != "N/A":
             print(f"[+] Localização: {evento_log['latitude']}, {evento_log['longitude']}")
             print(f"[+] Google Maps: {evento_log['google_maps']}")
+
+        if tipo == "email":
+            print(f"[+] Domínio informado: {evento_log.get('email_domain', 'N/A')}")
 
         return jsonify({"status": "ok"}), 200
 
