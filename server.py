@@ -228,6 +228,9 @@ if __name__ == "__main__":
         elif escolha == "6":
             app.config["MODO"] = "email"
             print("\n[+] Modo simulação de e-mail/conta ativo. Iniciando Flask...\n")
+            print("[+] Para acessar a página de e-mail, abra o link do Cloudflared e adicione /email no final.")
+            print("[+] Exemplo:")
+            print("    https://SEU-LINK.trycloudflare.com/email\n")
             break
 
         elif escolha == "7":
