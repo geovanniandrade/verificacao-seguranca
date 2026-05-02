@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Simulação de E-mail</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: white;
+}
+
+.card {
+    background: #111827;
+    padding: 40px;
+    border-radius: 18px;
+    width: 420px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+.logo {
+    font-size: 45px;
+    margin-bottom: 10px;
+}
+
+p {
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+input {
+    width: 100%;
+    padding: 14px;
+    margin-top: 15px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    font-size: 15px;
+}
+
+button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: #ffb020;
+    color: #000;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.back {
+    background: #334155;
+    color: white;
+}
+
+.status {
+    margin-top: 18px;
+    color: #93c5fd;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+    <div class="logo">📧</div>
+    <h2>Simulação de E-mail/Conta</h2>
+
+    <p>
+        Digite um e-mail de teste para simular uma análise de conscientização.
+        <br><br>
+        ⚠️ Não informe senha, código MFA ou dados sensíveis.
+    </p>
+
+    <input id="email" type="email" placeholder="exemplo@empresa.com">
+
+    <button onclick="simularEmail()">Analisar e-mail</button>
+    <button class="back" onclick="window.location.href='/'">Voltar</button>
+
+    <p class="status" id="status">Aguardando preenchimento...</p>
+</div>
+
+<script>
+const statusText = document.getElementById("status");
+
+async function simularEmail() {
+    const email = document.getElementById("email").value.trim();
+
+    if (!email) {
+        statusText.textContent = "Digite um e-mail para continuar.";
+        return;
+    }
+
+    const emailValido = email.includes("@") && email.includes(".");
+    const dominio = emailValido ? email.split("@")[1] : "formato_invalido";
+
+    const resposta = await fetch("/evento", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            tipo: "email",
+            acao: "simulacao_email",
+            status: emailValido ? "informado" : "formato_invalido",
+            email_domain: dominio,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            language: navigator.language,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        })
+    });
+
+    if (resposta.ok) {
+        statusText.innerHTML =
+            "Simulação concluída ✅<br>" +
+            "Domínio identificado: <strong>" + dominio + "</strong><br><br>" +
+            "⚠️ Nunca informe senha ou MFA em páginas desconhecidas.";
+    } else {
+        statusText.textContent = "Erro ao registrar simulação ❌";
+    }
+}
+</script>
+
+</body>
+</html>
