@@ -1,11 +1,13 @@
 import os
 import json
 import shutil
+import random
 from datetime import datetime
 from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 
-BANNER = r"""
+BANNERS = [
+r"""
    ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
   ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
   ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
@@ -17,7 +19,77 @@ BANNER = r"""
         🎣 Security Awareness Toolkit
         🐧 Running on Kali Linux
         CRIADO POR: Geovanni Andrade
+""",
+
+r"""
+   ▄████  █    ██  ██▓ ██▓███   ██░ ██  ██▓  ██████  ██░ ██
+  ██▒ ▀█▒ ██  ▓██▒▓██▒▓██░  ██▒▓██░ ██▒▓██▒▒██    ▒ ▓██░ ██▒
+ ▒██░▄▄▄░▓██  ▒██░▒██▒▓██░ ██▓▒▒██▀▀██░▒██▒░ ▓██▄   ▒██▀▀██░
+ ░▓█  ██▓▓▓█  ░██░░██░▒██▄█▓▒ ▒░▓█ ░██ ░██░  ▒   ██▒░▓█ ░██
+ ░▒▓███▀▒▒▒█████▓ ░██░▒██▒ ░  ░░▓█▒░██▓░██░▒██████▒▒░▓█▒░██▓
+  ░▒   ▒ ░▒▓▒ ▒ ▒ ░▓  ▒▓▒░ ░  ░ ▒ ░░▒░▒░▓  ▒ ▒▓▒ ▒ ░ ▒ ░░▒░▒
+   ░   ░ ░░▒░ ░ ░  ▒ ░░▒ ░      ▒ ░▒░ ░ ▒ ░░ ░▒  ░ ░ ▒ ░▒░ ░
+ ░ ░   ░  ░░░ ░ ░  ▒ ░░░        ░  ░░ ░ ▒ ░░  ░  ░   ░  ░░ ░
+       ░    ░      ░            ░  ░  ░ ░        ░   ░  ░  ░
+
+        📊 Awareness • Logs • Reports
+        ⚠️ Authorized Lab Only
+        CRIADO POR: Geovanni Andrade
+""",
+
+r"""
+   ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
+  ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
+  ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
+  ██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔══██║
+  ╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██║
+   ╚═════╝ ╚═╝      ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
+
+        👁️ Browser Permission Lab
+        📡 Camera • Location • Email Simulation
+        🧪 Educational Use Only
+""",
+
+r"""
+   _____       _ _____  _     _     _     
+  / ____|     (_)  __ \| |   (_)   | |    
+ | |  __ _   _ _| |__) | |__  _ ___| |__  
+ | | |_ | | | | |  ___/| '_ \| / __| '_ \ 
+ | |__| | |_| | | |    | | | | \__ \ | | |
+  \_____|\__,_|_|_|    |_| |_|_|___/_| |_|
+
+        🔐 GuiPhish Awareness Lab
+        🧠 Security Education Toolkit
+        👤 Created by Geovanni Andrade
+""",
+
+r"""
+      ________        .__ __________.__    .__       .__     
+     /  _____/ __ __  |__|\______   \  |__ |__| _____|  |__  
+    /   \  ___|  |  \ |  | |     ___/  |  \|  |/  ___/  |  \ 
+    \    \_\  \  |  / |  | |    |   |   Y  \  |\___ \|   Y  \
+     \______  /____/  |__| |____|   |___|  /__/____  >___|  /
+            \/                         \/        \/     \/ 
+
+        🎣 Social Engineering Awareness
+        🌍 Browser Permission Simulation
+        🛡️ Use with consent
+""",
+
+r"""
+    ________      .__ __________.__    .__       .__     
+   /  _____/ __ __|__|\______   \  |__ |__| _____|  |__  
+  /   \  ___|  |  \  | |     ___/  |  \|  |/  ___/  |  \ 
+  \    \_\  \  |  /  | |    |   |   Y  \  |\___ \|   Y  \
+   \______  /____/|__| |____|   |___|  /__/____  >___|  /
+          \/                         \/        \/     \/ 
+
+        📸 Camera Awareness
+        🌍 Location Awareness
+        📧 Email/Account Simulation
+        CRIADO POR: Geovanni Andrade
 """
+]
 
 app = Flask(__name__)
 CORS(app)
@@ -202,7 +274,7 @@ def painel():
 
 
 if __name__ == "__main__":
-    print(BANNER)
+    print(random.choice(BANNERS))
 
     while True:
         escolha = menu()
