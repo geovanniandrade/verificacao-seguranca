@@ -121,16 +121,6 @@ O Cloudflared irá gerar um link temporário:
 ```bash
 https://exemplo.trycloudflare.com
 ```
-### 📧 Simulação de e-mail/conta
-
-A simulação de e-mail fica em uma página separada.
-
-Acesse:
-```bash
-https://SEU-LINK.trycloudflare.com/email
-
-A simulação registra apenas o domínio informado, sem coletar senha, MFA, tokens ou dados sensíveis.
-```
 
 ### 📊 Dashboard
 
