@@ -8,60 +8,116 @@ from flask import Flask, request, jsonify, send_file, redirect, session
 
 # ================= CONFIG =================
 
-DASHBOARD_USER = "admin"
-DASHBOARD_PASS = "guiphish"
+DASHBOARD_USER = os.environ.get("DASHBOARD_USER", "admin")
+DASHBOARD_PASS = os.environ.get("DASHBOARD_PASS", "guiphish")
 
 app = Flask(__name__)
-app.secret_key = "guiphish_dashboard_secret"
+app.secret_key = os.environ.get("APP_SECRET_KEY", "guiphish_dashboard_secret")
 
 PASTAS = ["logs", "fotos", "relatorios"]
 
 for pasta in PASTAS:
     os.makedirs(pasta, exist_ok=True)
 
+# ================= CORES =================
+
+BLUE = "\033[94m"
+RED = "\033[91m"
+GREEN = "\033[92m"
+CYAN = "\033[96m"
+YELLOW = "\033[93m"
+RESET = "\033[0m"
+CLEAR = "\033[2J\033[H"
+
 # ================= BANNERS =================
 
 BANNERS = [
-r"""
+f"""
+{BLUE}
   ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
  ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
  ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
  ██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔══██║
  ╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██║
   ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
-
+{RED}
         🔐 GuiPhish Awareness Lab
         🎣 Security Awareness Toolkit
         🐧 Running on Kali Linux
         CRIADO POR: Geovanni Andrade
+{RESET}
 """,
-r"""
+
+f"""
+{RED}
+  ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
+ ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
+ ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
+ ██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔══██║
+ ╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██║
+  ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
+{BLUE}
+        📊 Logs • Dashboard • Reports
+        🧠 Browser Permission Awareness
+        ⚠️ Authorized Lab Only
+{RESET}
+""",
+
+f"""
+{BLUE}
    _____       _ _____  _     _     _
-  / ____|     (_)  __ \| |   (_)   | |
+  / ____|     (_)  __ \\| |   (_)   | |
  | |  __ _   _ _| |__) | |__  _ ___| |__
- | | |_ | | | | |  ___/| '_ \| / __| '_ \
- | |__| | |_| | | |    | | | | \__ \ | | |
-  \_____|\__,_|_|_|    |_| |_|_|___/_| |_|
-
-        🧠 Security Education Toolkit
-        📊 Logs • Reports • Dashboard
-        CRIADO POR: Geovanni Andrade
-""",
-
-r"""
-        👁️ Browser Permission Lab
-        📡 Camera • Location • Email
-        🛡️ Authorized Awareness Only
-""",
-r"""
-        🎣 Social Engineering Awareness
+ | | |_ | | | | |  ___/| '_ \\| / __| '_ \\
+ | |__| | |_| | | |    | | | | \\__ \\ | | |
+  \\_____|\\__,_|_|_|    |_| |_|_|___/_| |_|
+{RED}
         🔐 GuiPhish Toolkit
+        📸 Camera • 🌍 Location • 📧 Email
         📊 Dashboard Enabled
+{RESET}
 """,
-r"""
-        📸 Camera | 🌍 Location | 📧 Email
-        🧾 Reports | 📊 Dashboard | 🧹 Cleanup
+
+f"""
+{RED}
+   ▄████  █    ██  ██▓ ██▓███   ██░ ██
+  ██▒ ▀█▒ ██  ▓██▒▓██▒▓██░  ██▒▓██░ ██▒
+ ▒██░▄▄▄░▓██  ▒██░▒██▒▓██░ ██▓▒▒██▀▀██░
+ ░▓█  ██▓▓▓█  ░██░░██░▒██▄█▓▒ ▒░▓█ ░██
+ ░▒▓███▀▒▒▒█████▓ ░██░▒██▒ ░  ░░▓█▒░██▓
+{BLUE}
+        🌍 Geolocation Awareness Lab
+        🛡️ Controlled Security Simulation
+        👤 Created by Geovanni Andrade
+{RESET}
+""",
+
+f"""
+{BLUE}
+╔══════════════════════════════════════════════════════╗
+║                  GUIPHISH LAB                       ║
+║        Browser Permission Awareness Toolkit          ║
+╚══════════════════════════════════════════════════════╝
+{RED}
+        📸 Camera Capture Simulation
+        🌍 Location Permission Simulation
+        📧 Email/Account Awareness
+        🧾 Reports • 📊 Dashboard • 🧹 Cleanup
+{RESET}
+""",
+
+f"""
+{RED}
+╔══════════════════════════════════════════════════════╗
+║                  GUIPHISH                           ║
+║             Security Awareness Platform              ║
+╚══════════════════════════════════════════════════════╝
+{BLUE}
+        🔐 Authorized Testing Only
+        📊 SOC-style Dashboard
+        🐧 Kali Linux Ready
         CRIADO POR: Geovanni Andrade
+{RESET}
 """
 ]
 
@@ -88,15 +144,15 @@ def ler_eventos():
 def mostrar_logs():
     eventos = ler_eventos()
 
-    print("\n📊 Últimos eventos:\n")
+    print(f"\n{CYAN}📊 Últimos eventos:{RESET}\n")
 
     if not eventos:
-        print("[!] Nenhum evento registrado ainda.\n")
+        print(f"{YELLOW}[!] Nenhum evento registrado ainda.{RESET}\n")
         return
 
     for evento in eventos[-10:]:
         print(
-            f"- {evento.get('timestamp')} | "
+            f"{GREEN}- {evento.get('timestamp')}{RESET} | "
             f"{evento.get('tipo')} | "
             f"{evento.get('status')} | "
             f"IP: {evento.get('ip')}"
@@ -138,14 +194,14 @@ def gerar_relatorio():
         for evento in eventos[-20:]:
             f.write(json.dumps(evento, ensure_ascii=False) + "\n")
 
-    print(f"\n[+] Relatório gerado: {nome}\n")
+    print(f"\n{GREEN}[+] Relatório gerado: {nome}{RESET}\n")
 
 
 def limpar_evidencias():
-    confirmacao = input("\n[!] Apagar fotos, logs e relatórios locais? Digite SIM para confirmar: ")
+    confirmacao = input(f"\n{RED}[!] Apagar fotos, logs e relatórios locais? Digite SIM para confirmar: {RESET}")
 
     if confirmacao != "SIM":
-        print("[+] Operação cancelada.\n")
+        print(f"{YELLOW}[+] Operação cancelada.{RESET}\n")
         return
 
     for pasta in PASTAS:
@@ -153,11 +209,11 @@ def limpar_evidencias():
             shutil.rmtree(pasta)
         os.makedirs(pasta, exist_ok=True)
 
-    print("[+] Evidências locais apagadas com sucesso.\n")
+    print(f"{GREEN}[+] Evidências locais apagadas com sucesso.{RESET}\n")
 
 
 def menu():
-    print("\n[+] GuiPhish Awareness Lab\n")
+    print(f"\n{CYAN}[+] GuiPhish Awareness Lab{RESET}\n")
     print("1) 📸 Testar permissão de câmera")
     print("2) 🌍 Testar permissão de localização")
     print("3) 📊 Dashboard / login")
@@ -166,7 +222,7 @@ def menu():
     print("6) 📧 Simulação de e-mail/conta")
     print("7) 🛑 Sair")
 
-    return input("\nDigite a opção: ")
+    return input(f"\n{BLUE}Digite a opção: {RESET}")
 
 
 def autenticado():
@@ -221,8 +277,8 @@ def login():
 <title>GuiPhish Login</title>
 <style>
 body {{
-    background: radial-gradient(circle at top, #123524, #020617 60%);
-    color: #00ff88;
+    background: radial-gradient(circle at top, #0f172a, #020617 65%);
+    color: #38bdf8;
     font-family: monospace;
     height: 100vh;
     display: flex;
@@ -231,35 +287,38 @@ body {{
     margin: 0;
 }}
 .card {{
-    background: rgba(2, 6, 23, 0.92);
-    border: 1px solid #00ff88;
-    box-shadow: 0 0 25px rgba(0,255,136,0.25);
+    background: rgba(2, 6, 23, 0.95);
+    border: 1px solid #ef4444;
+    box-shadow: 0 0 30px rgba(56,189,248,0.25), 0 0 18px rgba(239,68,68,0.25);
     padding: 35px;
     border-radius: 16px;
-    width: 360px;
+    width: 380px;
     text-align: center;
+}}
+h1 {{
+    color: #ef4444;
 }}
 input {{
     width: 90%;
     padding: 12px;
     margin: 10px 0;
     background: #020617;
-    border: 1px solid #00ff88;
-    color: #00ff88;
+    border: 1px solid #38bdf8;
+    color: #38bdf8;
     border-radius: 8px;
 }}
 button {{
     width: 95%;
     padding: 12px;
-    background: #00ff88;
-    color: #020617;
+    background: linear-gradient(90deg, #38bdf8, #ef4444);
+    color: white;
     font-weight: bold;
     border: none;
     border-radius: 8px;
     cursor: pointer;
 }}
 .erro {{
-    color: #ff4d4d;
+    color: #ef4444;
     margin-top: 12px;
 }}
 </style>
@@ -350,19 +409,19 @@ body {{
 }}
 header {{
     padding: 25px;
-    background: linear-gradient(90deg, #020617, #052e16);
-    border-bottom: 1px solid #00ff88;
+    background: linear-gradient(90deg, #020617, #111827, #450a0a);
+    border-bottom: 1px solid #38bdf8;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }}
 header h1 {{
-    color: #00ff88;
+    color: #38bdf8;
     margin: 0;
 }}
 button, .btn {{
-    background: #00ff88;
-    color: #020617;
+    background: linear-gradient(90deg, #38bdf8, #ef4444);
+    color: white;
     border: none;
     padding: 10px 16px;
     border-radius: 8px;
@@ -384,11 +443,11 @@ button, .btn {{
     border: 1px solid #1f2937;
     border-radius: 14px;
     padding: 20px;
-    box-shadow: 0 0 18px rgba(0,255,136,0.08);
+    box-shadow: 0 0 18px rgba(56,189,248,0.08), 0 0 18px rgba(239,68,68,0.08);
 }}
 .card h2 {{
     margin: 0;
-    color: #00ff88;
+    color: #ef4444;
 }}
 .grid {{
     display: grid;
@@ -428,7 +487,7 @@ th, td {{
     font-size: 13px;
 }}
 th {{
-    color: #00ff88;
+    color: #38bdf8;
     text-align: left;
 }}
 a {{
@@ -499,7 +558,10 @@ new Chart(ctx, {{
         labels: ['Câmera', 'Localização', 'E-mail'],
         datasets: [{{
             label: 'Eventos',
-            data: [{total_camera}, {total_localizacao}, {total_email}]
+            data: [{total_camera}, {total_localizacao}, {total_email}],
+            backgroundColor: ['#38bdf8', '#ef4444', '#38bdf8'],
+            borderColor: ['#93c5fd', '#fca5a5', '#93c5fd'],
+            borderWidth: 1
         }}]
     }},
     options: {{
@@ -551,13 +613,13 @@ def evento():
     with open("logs/eventos.jsonl", "a", encoding="utf-8") as f:
         f.write(json.dumps(evento_log, ensure_ascii=False) + "\n")
 
-    print(f"\n[+] EVENTO REGISTRADO: {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
+    print(f"\n{GREEN}[+] EVENTO REGISTRADO:{RESET} {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
 
     if evento_log["google_maps"] != "N/A":
-        print(f"[+] Google Maps: {evento_log['google_maps']}")
+        print(f"{BLUE}[+] Google Maps:{RESET} {evento_log['google_maps']}")
 
     if tipo == "email":
-        print(f"[+] Domínio informado: {evento_log['email_domain']}")
+        print(f"{CYAN}[+] Domínio informado:{RESET} {evento_log['email_domain']}")
 
     return jsonify({"ok": True})
 
@@ -579,38 +641,39 @@ def capture():
         with open(nome, "wb") as f:
             f.write(img_bytes)
 
-        print(f"[+] FOTO SALVA: {nome}")
+        print(f"{GREEN}[+] FOTO SALVA:{RESET} {nome}")
 
         return jsonify({"ok": True, "arquivo": nome})
 
     except Exception as e:
-        print(f"[-] Erro ao salvar foto: {e}")
+        print(f"{RED}[-] Erro ao salvar foto:{RESET} {e}")
         return jsonify({"ok": False}), 500
 
 # ================= MAIN =================
 
 if __name__ == "__main__":
+    print(CLEAR)
     print(random.choice(BANNERS))
 
     while True:
         escolha = menu()
 
         if escolha == "1":
-            print("\n[+] Modo câmera ativo. Iniciando Flask...")
+            print(f"\n{GREEN}[+] Modo câmera ativo. Iniciando Flask...{RESET}")
             print("[+] Use o link principal do Cloudflared.\n")
             break
 
         elif escolha == "2":
-            print("\n[+] Modo localização ativo. Iniciando Flask...")
+            print(f"\n{GREEN}[+] Modo localização ativo. Iniciando Flask...{RESET}")
             print("[+] Use o link principal do Cloudflared.\n")
             break
 
         elif escolha == "3":
-            print("\n[+] Dashboard disponível em:")
+            print(f"\n{GREEN}[+] Dashboard disponível em:{RESET}")
             print("    https://SEU-LINK.trycloudflare.com/login")
             print("[+] Login padrão:")
-            print("    usuário: admin")
-            print("    senha: guiphish\n")
+            print(f"    usuário: {DASHBOARD_USER}")
+            print(f"    senha: {DASHBOARD_PASS}\n")
             break
 
         elif escolha == "4":
@@ -620,15 +683,15 @@ if __name__ == "__main__":
             limpar_evidencias()
 
         elif escolha == "6":
-            print("\n[+] Página de e-mail disponível em:")
+            print(f"\n{GREEN}[+] Página de e-mail disponível em:{RESET}")
             print("    https://SEU-LINK.trycloudflare.com/email\n")
             break
 
         elif escolha == "7":
-            print("\n[+] Saindo...\n")
+            print(f"\n{YELLOW}[+] Saindo...{RESET}\n")
             exit()
 
         else:
-            print("\n[!] Opção inválida.\n")
+            print(f"\n{RED}[!] Opção inválida.{RESET}\n")
 
     app.run(host="0.0.0.0", port=10000)
