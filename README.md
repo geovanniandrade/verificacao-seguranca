@@ -180,6 +180,23 @@ No menu da ferramenta, selecione:
 
 Essa opção apaga fotos, logs e relatórios locais após confirmação.
 
+## 🔐 Proteção de dados locais
+
+O projeto possui um script chamado `setup_security.sh` para preparar o ambiente local com mais segurança.
+
+Esse script faz:
+
+- Cria/atualiza o arquivo `.gitignore`
+- Impede que fotos, logs e relatórios sejam enviados ao GitHub
+- Cria as pastas locais `fotos/`, `logs/` e `relatorios/`
+- Aplica permissão `chmod 700` nessas pastas, permitindo acesso apenas ao usuário local
+
+### Executar o script
+
+```bash
+chmod +x setup_security.sh
+./setup_security.sh
+```
 
 ### ⚠️ Uso ético
 
