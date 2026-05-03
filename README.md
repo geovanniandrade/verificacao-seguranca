@@ -66,11 +66,11 @@ sudo apt update
 ### 2. Instalar dependências
 ```bash
 sudo apt install git python3-flask -y
+git clone https://github.com/geovanniandrade/verificacao-seguranca.git
 ```
 
 ### 3. Acessar o projeto
 ```bash
-git clone https://github.com/geovanniandrade/verificacao-seguranca.git
 cd /home/kali/verificacao-seguranca
 ```
 ### 4. Executar o servidor Flask
