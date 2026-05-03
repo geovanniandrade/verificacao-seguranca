@@ -1,0 +1,7 @@
+fotos/
+logs/
+relatorios/
+
+*.jpg
+*_info.json
+eventos.jsonl
