@@ -18,7 +18,6 @@ Simular um cenário controlado onde o usuário concede permissões sensíveis do
 - JavaScript
 - Python
 - Flask
-- Flask-CORS
 - Cloudflared
 - Kali Linux
 
@@ -34,8 +33,9 @@ Simular um cenário controlado onde o usuário concede permissões sensíveis do
 6. A câmera pode ser testada e a foto salva localmente em `fotos/`
 7. A localização pode ser testada e registrada em `logs/eventos.jsonl`
 8. A simulação de e-mail/conta fica disponível em `/email`
-9. Relatórios podem ser gerados em `relatorios/`
-10. A simulação é finalizada sem exposição pública dos arquivos locais
+9. O dashboard fica disponível em `/login`
+10. Relatórios podem ser gerados em `relatorios/`
+11. A simulação é finalizada sem exposição pública dos arquivos locais
 
 ---
 
@@ -51,6 +51,7 @@ O Flask é responsável por:
 - Salvar fotos no diretório `fotos/`
 - Registrar logs e metadados em `logs/eventos.jsonl`
 - Gerar relatórios locais em `relatorios/`
+- Disponibilizar dashboard protegido por login
 
 ---
 
@@ -64,7 +65,7 @@ sudo apt update
 
 ### 2. Instalar dependências
 ```bash
-sudo apt install python3-flask python3-flask-cors -y
+sudo apt install git python3-flask -y
 ```
 
 ### 3. Acessar o projeto
@@ -85,8 +86,8 @@ python3 server.py
 5) 🧹 Limpar evidências locais
 6) 📧 Simulação de e-mail/conta
 7) 🛑 Sair
-6. Saída esperada
 ```
+### 6. Saída esperada
 ```bash
 Running on http://127.0.0.1:10000
 Running on http://SEU-IP:10000
@@ -119,6 +120,42 @@ ls -la fotos
 Para abrir a pasta:
 
 xdg-open fotos
+
+### 📊 Dashboard
+
+O dashboard permite visualizar eventos, fotos capturadas, logs e gráfico de atividade.
+
+Acesse:
+```bash
+https://SEU-LINK.trycloudflare.com/login
+```
+Credenciais padrão:
+```bash
+Usuário: admin
+Senha: guiphish
+```
+Também é possível alterar usuário e senha usando variáveis de ambiente:
+```
+DASHBOARD_USER=admin DASHBOARD_PASS=MinhaSenhaForte python3 server.py
+```
+### 📧 Simulação de e-mail/conta
+
+A simulação de e-mail fica em uma página separada.
+
+Acesse:
+```bash
+https://SEU-LINK.trycloudflare.com/email
+```
+A simulação registra apenas o domínio informado, sem coletar senha, MFA, tokens ou dados sensíveis.
+
+### 📸 Validar fotos capturadas
+```bash
+ls -la fotos
+```
+Para abrir a pasta:
+```bash
+xdg-open fotos
+```
 
 ### 🌍 Validar logs e localização
 ```bash
