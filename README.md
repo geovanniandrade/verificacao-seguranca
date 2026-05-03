@@ -131,13 +131,6 @@ https://SEU-LINK.trycloudflare.com/email
 
 A simulação registra apenas o domínio informado, sem coletar senha, MFA, tokens ou dados sensíveis.
 ```
-### 📸 Validar fotos capturadas
-```bash
-ls -la fotos
-```
-Para abrir a pasta:
-
-xdg-open fotos
 
 ### 📊 Dashboard
 
