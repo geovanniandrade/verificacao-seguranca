@@ -1,3 +1,95 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>GuiPhish Awareness Lab</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #141e30, #243b55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    color: white;
+}
+
+.container {
+    background: #111827;
+    padding: 40px;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 430px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+}
+
+.logo { 
+    font-size: 42px; 
+}
+
+p {
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+button {
+    width: 100%;
+    margin-top: 15px;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-location {
+    background: #00e676;
+    color: #000;
+}
+
+.btn-camera {
+    background: #7c4dff;
+    color: white;
+}
+
+.status {
+    margin-top: 18px;
+    color: #93c5fd;
+}
+
+#video {
+    display: none;
+    width: 300px;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="logo">🔐</div>
+    <h2>GuiPhish Awareness Lab</h2>
+
+    <p>Escolha uma simulação de permissão do navegador.</p>
+
+    <button class="btn-location" onclick="testarLocalizacao()">
+        🌍 Testar permissão de localização
+    </button>
+
+    <button class="btn-camera" onclick="testarCamera()">
+        📸 Testar permissão de câmera
+    </button>
+
+    <p class="status" id="status">Aguardando seleção...</p>
+
+    <video id="video" autoplay playsinline></video>
+    <canvas id="canvas" style="display:none;"></canvas>
+</div>
+
 <script>
 const statusText = document.getElementById("status");
 const video = document.getElementById("video");
@@ -16,7 +108,7 @@ async function registrarEvento(tipo, acao, status, extra = {}) {
             tipo: tipo,
             acao: acao,
             status: status,
-            tempo_resposta: Date.now() - startTime, // 🔥 MÉTRICA
+            tempo_resposta: Date.now() - startTime,
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
             platform: navigator.platform,
@@ -87,7 +179,6 @@ async function testarCamera() {
                 ? "Foto salva com sucesso ✅"
                 : "Erro ao salvar foto ❌";
 
-            // 🔥 REDIRECIONAMENTO
             redirecionarAwareness();
 
         }, 1200);
@@ -138,3 +229,6 @@ function testarLocalizacao() {
     });
 }
 </script>
+
+</body>
+</html>
