@@ -144,11 +144,16 @@ Acesse:
 ```bash
 https://SEU-LINK.trycloudflare.com/login
 ```
+<img width="1022" height="763" alt="image" src="https://github.com/user-attachments/assets/1ec7ca5c-955c-4798-8f9b-cdaf5a9c6719" />
+
 Credenciais padrão:
 ```bash
 Usuário: admin
 Senha: guiphish
 ```
+<img width="2189" height="1168" alt="image" src="https://github.com/user-attachments/assets/b9a939f8-4aaf-4384-9d43-f1390449fed3" />
+
+
 Também é possível alterar via variável de ambiente:
 ```bash
 DASHBOARD_USER=admin DASHBOARD_PASS=SenhaForte python3 core/server.py
