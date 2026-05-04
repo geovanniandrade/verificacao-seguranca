@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>GuiPhish Learn</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #020617, #111827);
+    color: white;
+    margin: 0;
+}
+
+.container {
+    max-width: 950px;
+    margin: 40px auto;
+    background: #0f172a;
+    padding: 36px;
+    border-radius: 18px;
+}
+
+.badge {
+    display: inline-block;
+    background: #38bdf8;
+    color: #020617;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-weight: bold;
+}
+
+h1 { color: #38bdf8; }
+h2 { color: #f59e0b; margin-top: 30px; }
+
+p, li {
+    color: #cbd5e1;
+    line-height: 1.6;
+}
+
+.card {
+    background: #111827;
+    border: 1px solid #1f2937;
+    padding: 18px;
+    border-radius: 14px;
+    margin: 16px 0;
+}
+
+.alert {
+    border-left: 5px solid #ef4444;
+}
+
+.safe {
+    border-left: 5px solid #22c55e;
+}
+
+.warning {
+    border-left: 5px solid #f59e0b;
+}
+
+button {
+    margin-top: 25px;
+    padding: 14px 20px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #38bdf8, #2563eb);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <span class="badge">Material educativo</span>
+
+    <h1>📚 GuiPhish Learn</h1>
+
+    <p>
+        Esta área foi criada para apoiar treinamentos de conscientização em segurança,
+        explicando como ataques de phishing exploram confiança, urgência e distração.
+    </p>
+
+    <div class="card alert">
+        <h2>🎣 O que é phishing?</h2>
+        <p>
+            Phishing é uma técnica de engenharia social usada para enganar pessoas e induzi-las
+            a clicar em links, informar dados, baixar arquivos ou conceder permissões sensíveis.
+        </p>
+    </div>
+
+    <div class="card warning">
+        <h2>⚠️ Sinais de alerta</h2>
+        <ul>
+            <li>Mensagem com urgência exagerada.</li>
+            <li>Promessa de benefício fácil.</li>
+            <li>Solicitação de senha, código MFA ou token.</li>
+            <li>Link encurtado ou domínio estranho.</li>
+            <li>Pedido de acesso à câmera, microfone ou localização sem necessidade.</li>
+        </ul>
+    </div>
+
+    <div class="card safe">
+        <h2>🛡️ Boas práticas</h2>
+        <ul>
+            <li>Verifique o domínio antes de clicar.</li>
+            <li>Nunca informe senha ou MFA em páginas suspeitas.</li>
+            <li>Desconfie de mensagens com pressão emocional.</li>
+            <li>Confirme solicitações incomuns com o time de TI/SI.</li>
+            <li>Use autenticação multifator sempre que possível.</li>
+        </ul>
+    </div>
+
+    <div class="card warning">
+        <h2>🌐 Permissões do navegador</h2>
+        <p>
+            Sites podem solicitar acesso à câmera, localização, microfone e notificações.
+            Em ambientes reais, conceder permissões sem validar a origem pode expor informações pessoais
+            ou corporativas.
+        </p>
+    </div>
+
+    <div class="card safe">
+        <h2>✅ Checklist rápido</h2>
+        <ul>
+            <li>O domínio é confiável?</li>
+            <li>A mensagem faz sentido?</li>
+            <li>Existe urgência artificial?</li>
+            <li>Está pedindo dado sensível?</li>
+            <li>Você validou com o time responsável?</li>
+        </ul>
+    </div>
+
+    <button onclick="window.location.href='/'">Voltar para o início</button>
+</div>
+
+</body>
+</html>
