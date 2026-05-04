@@ -49,6 +49,7 @@ CLEAR = "\033[2J\033[H"
 # ================= BANNERS =================
 
 BANNERS = [
+
 f"""
 {BLUE}
 ╔══════════════════════════════════════════════════════╗
@@ -60,6 +61,33 @@ f"""
         📊 SOC-style Dashboard
         🐧 Kali Linux Ready
         CRIADO POR: Geovanni Andrade
+{RESET}
+""",
+
+f"""
+{CYAN}
+██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
+██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║ ██╔╝
+██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗█████╔╝
+██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔═██╗
+╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██╗
+ ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
+{RED}
+        🔥 Security Awareness Toolkit
+        🎯 Phishing Simulation Lab
+{RESET}
+""",
+
+f"""
+{BLUE}
+[ GUIPHISH LAB ]
+------------------------------
+> SOC Simulation Environment
+> Behavioral Analysis Enabled
+> Real-time Monitoring Active
+{RED}
+[ WARNING ]
+Authorized testing only
 {RESET}
 """
 ]
