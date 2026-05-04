@@ -1,7 +1,22 @@
+# Dados sensíveis / locais
+data/
+core/storage/
 fotos/
 logs/
 relatorios/
 
-*.jpg
-*_info.json
-eventos.jsonl
+# Logs e temporários
+*.log
+*.json
+*.tmp
+*.cache
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Sistema
+.DS_Store
+Thumbs.db
