@@ -229,13 +229,15 @@ Nunca utilize sem consentimento.
 ```
 ### 🛡️ Aprendizados
 
-Engenharia social
-Phishing awareness
-Permissões do navegador
-Geolocalização via browser
-WebRTC
-Backend com Flask
-Monitoramento de eventos
-Análise comportamental
-Segurança ofensiva controlada
-Visualização estilo SOC
+## 🛡️ Aprendizados
+
+- Engenharia social
+- Phishing awareness
+- Permissões do navegador
+- Geolocalização via browser
+- WebRTC
+- Backend com Flask
+- Monitoramento de eventos
+- Análise comportamental
+- Segurança ofensiva controlada
+- Visualização estilo SOC
