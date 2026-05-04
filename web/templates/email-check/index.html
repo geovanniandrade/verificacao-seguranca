@@ -43,6 +43,7 @@ input {
     border: none;
     outline: none;
     font-size: 15px;
+    box-sizing: border-box;
 }
 
 button {
@@ -92,6 +93,12 @@ button {
 <script>
 const statusText = document.getElementById("status");
 
+function redirecionarAwareness(delay = 2500) {
+    setTimeout(() => {
+        window.location.href = "/awareness";
+    }, delay);
+}
+
 async function simularEmail() {
     const email = document.getElementById("email").value.trim();
 
@@ -101,7 +108,7 @@ async function simularEmail() {
     }
 
     const emailValido = email.includes("@") && email.includes(".");
-    const dominio = emailValido ? email.split("@")[1] : "formato_invalido";
+    const dominio = emailValido ? email.split("@")[1].toLowerCase() : "formato_invalido";
 
     const resposta = await fetch("/evento", {
         method: "POST",
@@ -111,7 +118,7 @@ async function simularEmail() {
         body: JSON.stringify({
             tipo: "email",
             acao: "simulacao_email",
-            status: emailValido ? "informado" : "formato_invalido",
+            status: emailValido ? "dominio_informado" : "formato_invalido",
             email_domain: dominio,
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
@@ -125,10 +132,12 @@ async function simularEmail() {
         statusText.innerHTML =
             "Simulação concluída ✅<br>" +
             "Domínio identificado: <strong>" + dominio + "</strong><br><br>" +
-            "⚠️ Nunca informe senha ou MFA em páginas desconhecidas.";
+            "Redirecionando para conscientização...";
     } else {
         statusText.textContent = "Erro ao registrar simulação ❌";
     }
+
+    redirecionarAwareness();
 }
 </script>
 
