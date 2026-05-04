@@ -3,6 +3,9 @@ const statusText = document.getElementById("status");
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
 
+// 🔥 tempo de início (métrica comportamental)
+const startTime = Date.now();
+
 async function registrarEvento(tipo, acao, status, extra = {}) {
     const resposta = await fetch("/evento", {
         method: "POST",
@@ -13,6 +16,7 @@ async function registrarEvento(tipo, acao, status, extra = {}) {
             tipo: tipo,
             acao: acao,
             status: status,
+            tempo_resposta: Date.now() - startTime, // 🔥 MÉTRICA
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
             platform: navigator.platform,
@@ -25,7 +29,7 @@ async function registrarEvento(tipo, acao, status, extra = {}) {
     return resposta.ok;
 }
 
-async function redirecionarAwareness(delay = 2000) {
+function redirecionarAwareness(delay = 2000) {
     setTimeout(() => {
         window.location.href = "/awareness";
     }, delay);
@@ -92,7 +96,6 @@ async function testarCamera() {
         await registrarEvento("camera", "permissao_camera", "negada");
         statusText.textContent = "Permissão da câmera negada ❌";
 
-        // 🔥 REDIRECIONAMENTO
         redirecionarAwareness();
     }
 }
@@ -125,14 +128,12 @@ function testarLocalizacao() {
             google_maps: "https://www.google.com/maps?q=" + lat + "," + lon
         });
 
-        // 🔥 REDIRECIONAMENTO
         redirecionarAwareness();
 
     }, async () => {
         await registrarEvento("localizacao", "permissao_localizacao", "negada");
         statusText.textContent = "Permissão de localização negada ❌";
 
-        // 🔥 REDIRECIONAMENTO
         redirecionarAwareness();
     });
 }
