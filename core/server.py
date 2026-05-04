@@ -270,6 +270,11 @@ def awareness():
     return send_file(os.path.join(PAGES_DIR, "awareness.html"))
 
 
+@app.route("/learn")
+def learn():
+    return send_file(os.path.join(PAGES_DIR, "learn.html"))
+
+
 @app.route("/foto/<nome>")
 def foto(nome):
     if not autenticado():
