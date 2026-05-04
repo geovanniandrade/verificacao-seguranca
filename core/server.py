@@ -51,16 +51,14 @@ CLEAR = "\033[2J\033[H"
 BANNERS = [
 f"""
 {BLUE}
-  ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
- ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
- ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
- ██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔══██║
- ╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██║
-  ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
+╔══════════════════════════════════════════════════════╗
+║                  GUIPHISH                           ║
+║             Security Awareness Platform              ║
+╚══════════════════════════════════════════════════════╝
 {RED}
-        🔐 GuiPhish Awareness Lab
-        🎣 Security Awareness Toolkit
-        🐧 Running on Kali Linux
+        🔐 Authorized Testing Only
+        📊 SOC-style Dashboard
+        🐧 Kali Linux Ready
         CRIADO POR: Geovanni Andrade
 {RESET}
 """
@@ -184,18 +182,25 @@ def limpar_evidencias():
 
 def menu():
     print(f"\n{CYAN}[+] GuiPhish Awareness Lab{RESET}\n")
-    print("1) 📸 Testar permissão de câmera")
-    print("2) 🌍 Testar permissão de localização")
+    print("1) 📸 Testar permissão de câmera/localização")
+    print("2) 🎯 Escolher template de simulação")
     print("3) 📊 Dashboard / login")
     print("4) 🧾 Gerar relatório do lab")
     print("5) 🧹 Limpar evidências locais")
-    print("6) 📧 Simulação de e-mail/conta")
-    print("7) 💼 Template rede profissional")
-    print("8) 🔒 Template conta bloqueada")
-    print("9) 🛡️ Template atualização de segurança")
-    print("10) 🛑 Sair")
+    print("6) 🛑 Sair")
 
     return input(f"\n{BLUE}Digite a opção: {RESET}")
+
+
+def menu_templates():
+    print(f"\n{CYAN}[+] Escolha o template de simulação:{RESET}\n")
+    print("1) 💼 Rede profissional")
+    print("2) 🔒 Conta bloqueada")
+    print("3) 🛡️ Atualização de segurança")
+    print("4) 📧 E-mail/conta")
+    print("5) ↩ Voltar")
+
+    return input(f"\n{BLUE}Digite a opção do template: {RESET}")
 
 
 def autenticado():
@@ -664,18 +669,57 @@ if __name__ == "__main__":
         escolha = menu()
 
         if escolha == "1":
-            print(f"\n{GREEN}[+] Modo câmera ativo. Iniciando Flask...{RESET}")
-            print("[+] URL principal: /")
+            print(f"\n{GREEN}[+] Modo câmera/localização ativo. Iniciando Flask...{RESET}")
+            print(f"{YELLOW}[!] Como usar:{RESET}")
+            print("    Use o link principal do Cloudflare:")
+            print("    https://SEU-LINK.trycloudflare.com/")
+            print("")
             break
 
         elif escolha == "2":
-            print(f"\n{GREEN}[+] Modo localização ativo. Iniciando Flask...{RESET}")
-            print("[+] URL principal: /")
-            break
+            escolha_template = menu_templates()
+
+            if escolha_template == "1":
+                print(f"\n{GREEN}[+] Template Rede Profissional selecionado.{RESET}")
+                print(f"{YELLOW}[!] Como usar:{RESET}")
+                print("    Use o link do Cloudflare com o caminho:")
+                print("    https://SEU-LINK.trycloudflare.com/linkedin")
+                print("")
+                break
+
+            elif escolha_template == "2":
+                print(f"\n{GREEN}[+] Template Conta Bloqueada selecionado.{RESET}")
+                print(f"{YELLOW}[!] Como usar:{RESET}")
+                print("    Use o link do Cloudflare com o caminho:")
+                print("    https://SEU-LINK.trycloudflare.com/conta-bloqueada")
+                print("")
+                break
+
+            elif escolha_template == "3":
+                print(f"\n{GREEN}[+] Template Atualização de Segurança selecionado.{RESET}")
+                print(f"{YELLOW}[!] Como usar:{RESET}")
+                print("    Use o link do Cloudflare com o caminho:")
+                print("    https://SEU-LINK.trycloudflare.com/atualizacao-seguranca")
+                print("")
+                break
+
+            elif escolha_template == "4":
+                print(f"\n{GREEN}[+] Template E-mail/Conta selecionado.{RESET}")
+                print(f"{YELLOW}[!] Como usar:{RESET}")
+                print("    Use o link do Cloudflare com o caminho:")
+                print("    https://SEU-LINK.trycloudflare.com/email")
+                print("")
+                break
+
+            elif escolha_template == "5":
+                continue
+
+            else:
+                print(f"\n{RED}[!] Opção inválida no menu de templates.{RESET}\n")
 
         elif escolha == "3":
             print(f"\n{GREEN}[+] Dashboard disponível em:{RESET}")
-            print("    /login")
+            print("    https://SEU-LINK.trycloudflare.com/login")
             print("[+] Login padrão:")
             print(f"    usuário: {DASHBOARD_USER}")
             print(f"    senha: {DASHBOARD_PASS}\n")
@@ -688,26 +732,6 @@ if __name__ == "__main__":
             limpar_evidencias()
 
         elif escolha == "6":
-            print(f"\n{GREEN}[+] Página de e-mail disponível em:{RESET}")
-            print("    /email\n")
-            break
-
-        elif escolha == "7":
-            print(f"\n{GREEN}[+] Template rede profissional disponível em:{RESET}")
-            print("    /linkedin\n")
-            break
-
-        elif escolha == "8":
-            print(f"\n{GREEN}[+] Template conta bloqueada disponível em:{RESET}")
-            print("    /conta-bloqueada\n")
-            break
-
-        elif escolha == "9":
-            print(f"\n{GREEN}[+] Template atualização de segurança disponível em:{RESET}")
-            print("    /atualizacao-seguranca\n")
-            break
-
-        elif escolha == "10":
             print(f"\n{YELLOW}[+] Saindo...{RESET}\n")
             exit()
 
