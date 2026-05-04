@@ -161,6 +161,8 @@ DASHBOARD_USER=admin DASHBOARD_PASS=SenhaForte python3 core/server.py
 🛡️ Atualização de segurança
 📧 Simulação de e-mail
 ```
+<img width="543" height="503" alt="image" src="https://github.com/user-attachments/assets/527c4868-8bc2-4208-9e8a-fbdf021bc48c" />
+
 
 ### 📚 Página educativa
 
