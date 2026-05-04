@@ -79,18 +79,27 @@ f"""
 """,
 
 f"""
+{CYAN}
+██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
+██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║ ██╔╝
+██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗█████╔╝ 
+██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔═██╗ 
+╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██╗
+ ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
 {BLUE}
-[ GUIPHISH LAB ]
-------------------------------
-> SOC Simulation Environment
-> Behavioral Analysis Enabled
-> Real-time Monitoring Active
+══════════════════════════════════════════════════════════════
+        SECURITY AWARENESS • HUMAN RISK ANALYSIS PLATFORM
+══════════════════════════════════════════════════════════════
 {RED}
-[ WARNING ]
-Authorized testing only
+ 🔐 Authorized Testing Only
+ 📊 SOC-style Real-time Dashboard
+ 🎯 Phishing Simulation Engine
+ 🧠 Behavioral Risk Classification Enabled
+ 🐧 Kali Linux Ready
+ CRIADO POR: Geovanni Andrade
+══════════════════════════════════════════════════════════════
 {RESET}
 """
-]
 
 # ================= FUNÇÕES =================
 
