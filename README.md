@@ -10,11 +10,14 @@ Ferramenta educacional para laboratório de conscientização em segurança, dem
 
 Simular um cenário controlado onde o usuário concede permissões sensíveis do navegador, como câmera, localização e informações de e-mail, demonstrando como decisões aparentemente simples podem levar à exposição de dados.
 
+Além disso, a ferramenta realiza **análise comportamental**, classificando o nível de risco com base no tempo de resposta do usuário.
+
 ---
 
 ## ⚙️ Tecnologias
 
 - HTML
+- CSS
 - JavaScript
 - Python
 - Flask
@@ -30,12 +33,30 @@ Simular um cenário controlado onde o usuário concede permissões sensíveis do
 3. O Cloudflared gera um link HTTPS temporário
 4. O usuário acessa o link
 5. A página apresenta opções de simulação
-6. A câmera pode ser testada e a foto salva localmente em `fotos/`
-7. A localização pode ser testada e registrada em `logs/eventos.jsonl`
-8. A simulação de e-mail/conta fica disponível em `/email`
-9. O dashboard fica disponível em `/login`
-10. Relatórios podem ser gerados em `relatorios/`
-11. A simulação é finalizada sem exposição pública dos arquivos locais
+6. O usuário interage (câmera, localização ou templates)
+7. Os eventos são registrados em tempo real
+8. O dashboard exibe os dados com análise de risco
+9. Relatórios podem ser gerados localmente
+10. A simulação é finalizada com conscientização do usuário
+
+---
+
+## 🧠 Funcionalidades principais
+
+- 📸 Captura de câmera (com consentimento)
+- 🌍 Captura de localização
+- 📧 Simulação de e-mail (sem coleta de senha)
+- 🎯 Templates de phishing simulados
+- ⏱️ Análise de tempo de resposta
+- 🔴 Classificação de risco:
+  - Alto risco (< 2s)
+  - Médio risco (2–5s)
+  - Consciente (> 5s)
+- 📊 Dashboard estilo SOC
+- 📺 Modo demonstração ao vivo (auto refresh)
+- 📚 Página educativa (`/learn`)
+- 🧾 Geração de relatórios
+- 🧹 Limpeza de evidências locais
 
 ---
 
@@ -43,14 +64,13 @@ Simular um cenário controlado onde o usuário concede permissões sensíveis do
 
 O Flask é responsável por:
 
-- Servir o arquivo `index.html`
-- Servir a página separada `email.html`
-- Receber eventos via requisição POST em `/evento`
-- Receber imagens via requisição POST em `/capture`
-- Decodificar imagens em Base64
-- Salvar fotos no diretório `fotos/`
-- Registrar logs e metadados em `logs/eventos.jsonl`
-- Gerar relatórios locais em `relatorios/`
+- Servir páginas HTML (templates e páginas educativas)
+- Receber eventos via `/evento`
+- Receber imagens via `/capture`
+- Classificar risco comportamental
+- Registrar logs em `data/logs/eventos.jsonl`
+- Salvar fotos em `data/fotos/`
+- Gerar relatórios em `data/reports/`
 - Disponibilizar dashboard protegido por login
 
 ---
@@ -71,60 +91,54 @@ git clone https://github.com/geovanniandrade/verificacao-seguranca.git
 
 ### 3. Acessar o projeto
 ```bash
-cd /home/kali/verificacao-seguranca
+cd ~/verificacao-seguranca
 ```
+
 ### 4. Executar o servidor Flask
 ```bash
-python3 server.py
+python3 core/server.py
 ```
-## 🔐 Proteção de dados locais
 
-O projeto possui um script chamado `setup_security.sh` para preparar o ambiente local com mais segurança.
+### 🔐 Proteção de dados locais
 
-Esse script faz:
+O projeto possui um script chamado setup_security.sh para preparar o ambiente local com mais segurança.
 
-- Cria/atualiza o arquivo `.gitignore`
-- Impede que fotos, logs e relatórios sejam enviados ao GitHub
-- Cria as pastas locais `fotos/`, `logs/` e `relatorios/`
-- Aplica permissão `chmod 700` nessas pastas, permitindo acesso apenas ao usuário local
-
-### Executar o script
-
+Esse script:
+```bash
+Cria/atualiza .gitignore
+Impede envio de dados sensíveis ao GitHub
+Cria pastas locais:
+data/fotos/
+data/logs/
+data/reports/
+Aplica permissão chmod 700
+```
+Executar:
 ```bash
 chmod +x setup_security.sh
 ./setup_security.sh
 ```
 
-### 5. Escolher uma opção no menu
+### 📋 Menu da ferramenta
 ```bash
-1) 📸 Testar permissão de câmera
-2) 🌍 Testar permissão de localização
-3) 📊 Dashboard / visualizar logs
+1) 📸 Testar permissão de câmera/localização
+2) 🎯 Escolher template de simulação
+3) 📊 Dashboard / login
 4) 🧾 Gerar relatório do lab
 5) 🧹 Limpar evidências locais
-6) 📧 Simulação de e-mail/conta
-7) 🛑 Sair
-```
-### 6. Saída esperada
-```bash
-Running on http://127.0.0.1:10000
-Running on http://SEU-IP:10000
+6) 🛑 Sair
 ```
 
 ### 🌐 Expor o lab com HTTPS
-
-Em outro terminal:
 ```bash
-cloudflared tunnel --url http://127.0.0.1:10000 --protocol http2
+cloudflared tunnel --url http://127.0.0.1:10000
 ```
-O Cloudflared irá gerar um link temporário:
+Exemplo de link:
 ```bash
 https://exemplo.trycloudflare.com
 ```
 
 ### 📊 Dashboard
-
-O dashboard permite visualizar eventos, fotos capturadas, logs e gráfico de atividade.
 
 Acesse:
 ```bash
@@ -135,66 +149,86 @@ Credenciais padrão:
 Usuário: admin
 Senha: guiphish
 ```
-Também é possível alterar usuário e senha usando variáveis de ambiente:
+Também é possível alterar via variável de ambiente:
+```bash
+DASHBOARD_USER=admin DASHBOARD_PASS=SenhaForte python3 core/server.py
 ```
-DASHBOARD_USER=admin DASHBOARD_PASS=MinhaSenhaForte python3 server.py
-```
-### 📧 Simulação de e-mail/conta
 
-A simulação de e-mail fica em uma página separada.
+### 🎯 Templates disponíveis
+```bash
+💼 Rede profissional
+🔒 Conta bloqueada
+🛡️ Atualização de segurança
+📧 Simulação de e-mail
+```
+
+### 📚 Página educativa
 
 Acesse:
 ```bash
+https://SEU-LINK.trycloudflare.com/learn
+```
+Conteúdo:
+```bash
+O que é phishing
+Sinais de alerta
+Boas práticas
+Checklist de segurança
+```
+
+### 📧 Simulação de e-mail
+```bash
 https://SEU-LINK.trycloudflare.com/email
 ```
-A simulação registra apenas o domínio informado, sem coletar senha, MFA, tokens ou dados sensíveis.
+Registra apenas domínio — não coleta dados sensíveis.
 
 ### 📸 Validar fotos capturadas
 ```bash
-ls -la fotos
-```
-Para abrir a pasta:
-```bash
-xdg-open fotos
+ls data/fotos
+xdg-open data/fotos
 ```
 
-### 🌍 Validar logs e localização
+### 🌍 Validar logs
 ```bash
-tail -n 10 logs/eventos.jsonl
+tail -n 10 data/logs/eventos.jsonl
 ```
-### 🧾 Gerar relatório do lab
+### 🧾 Relatórios
 
-No menu da ferramenta, selecione:
+Gerados via menu (opção 4):
 ```bash
-4
-```
-Os relatórios serão salvos em:
-```bash
-relatorios/
-```
-### 🧹 Limpar evidências locais
-
-No menu da ferramenta, selecione:
-```bash
-5
+data/reports/
 ```
 
-Essa opção apaga fotos, logs e relatórios locais após confirmação.
+### 🧹 Limpeza de evidências
 
+Menu opção 5:
+
+Remove:
+```bash
+fotos
+logs
+relatórios
+```
 
 ### ⚠️ Uso ético
 
-Este projeto deve ser utilizado exclusivamente em ambientes controlados, acadêmicos ou corporativos, com consentimento dos participantes.
+Este projeto deve ser utilizado apenas em:
+```bash
+ambientes controlados
+treinamentos autorizados
+fins educacionais
 
-Nunca utilize esta ferramenta para capturar imagens, localização, e-mails ou qualquer dado sem autorização explícita.
-
+Nunca utilize sem consentimento.
+```
 ### 🛡️ Aprendizados
-Engenharia social aplicada
-Permissões de navegador
-WebRTC
+
+Engenharia social
+Phishing awareness
+Permissões do navegador
 Geolocalização via browser
+WebRTC
 Backend com Flask
-Registro de eventos
-Geração de relatórios
-Exposição segura via túnel HTTPS
-Boas práticas de conscientização em segurança
+Monitoramento de eventos
+Análise comportamental
+Segurança ofensiva controlada
+Visualização estilo SOC
