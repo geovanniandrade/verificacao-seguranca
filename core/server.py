@@ -84,6 +84,25 @@ def ler_eventos():
     return eventos
 
 
+def calcular_tempos(eventos):
+    tempos_resposta = [
+        e.get("tempo_resposta")
+        for e in eventos
+        if isinstance(e.get("tempo_resposta"), (int, float))
+    ]
+
+    if tempos_resposta:
+        tempo_medio = round(sum(tempos_resposta) / len(tempos_resposta) / 1000, 2)
+        tempo_minimo = round(min(tempos_resposta) / 1000, 2)
+        tempo_maximo = round(max(tempos_resposta) / 1000, 2)
+    else:
+        tempo_medio = 0
+        tempo_minimo = 0
+        tempo_maximo = 0
+
+    return tempo_medio, tempo_minimo, tempo_maximo
+
+
 def mostrar_logs():
     eventos = ler_eventos()
 
@@ -94,10 +113,14 @@ def mostrar_logs():
         return
 
     for evento in eventos[-10:]:
+        tempo = evento.get("tempo_resposta")
+        tempo_formatado = f"{round(tempo / 1000, 2)}s" if isinstance(tempo, (int, float)) else "N/A"
+
         print(
             f"{GREEN}- {evento.get('timestamp')}{RESET} | "
             f"{evento.get('tipo')} | "
             f"{evento.get('status')} | "
+            f"Tempo: {tempo_formatado} | "
             f"IP: {evento.get('ip')}"
         )
 
@@ -115,6 +138,8 @@ def gerar_relatorio():
     total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
     total_email = len([e for e in eventos if e.get("tipo") == "email"])
 
+    tempo_medio, tempo_minimo, tempo_maximo = calcular_tempos(eventos)
+
     nome = os.path.join(
         RELATORIOS_DIR,
         f"relatorio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
@@ -128,7 +153,10 @@ def gerar_relatorio():
         f.write(f"Eventos de câmera: {total_camera}\n")
         f.write(f"Eventos de localização: {total_localizacao}\n")
         f.write(f"Eventos de e-mail/conta: {total_email}\n")
-        f.write(f"Fotos salvas: {len(fotos)}\n\n")
+        f.write(f"Fotos salvas: {len(fotos)}\n")
+        f.write(f"Tempo médio de resposta: {tempo_medio}s\n")
+        f.write(f"Menor tempo de resposta: {tempo_minimo}s\n")
+        f.write(f"Maior tempo de resposta: {tempo_maximo}s\n\n")
         f.write("Últimos eventos:\n")
 
         for evento in eventos[-20:]:
@@ -306,6 +334,8 @@ def dashboard():
     total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
     total_email = len([e for e in eventos if e.get("tipo") == "email"])
 
+    tempo_medio, tempo_minimo, tempo_maximo = calcular_tempos(eventos)
+
     ultimos_eventos_html = ""
 
     for e in eventos[-30:][::-1]:
@@ -318,12 +348,16 @@ def dashboard():
         if e.get("email_domain") not in [None, "N/A"]:
             email_info = f"<span>📧 {e.get('email_domain')}</span>"
 
+        tempo = e.get("tempo_resposta")
+        tempo_formatado = f"{round(tempo / 1000, 2)}s" if isinstance(tempo, (int, float)) else "N/A"
+
         ultimos_eventos_html += f"""
         <tr>
             <td>{e.get('timestamp')}</td>
             <td>{e.get('tipo')}</td>
             <td>{e.get('status')}</td>
             <td>{e.get('ip')}</td>
+            <td>{tempo_formatado}</td>
             <td>{maps} {email_info}</td>
         </tr>
         """
@@ -379,7 +413,7 @@ button, .btn {{
 }}
 .cards {{
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 15px;
     margin-bottom: 25px;
 }}
@@ -459,6 +493,9 @@ canvas {{
         <div class="card"><h2>{total_camera}</h2><p>Câmera</p></div>
         <div class="card"><h2>{total_localizacao}</h2><p>Localização</p></div>
         <div class="card"><h2>{total_email}</h2><p>E-mail</p></div>
+        <div class="card"><h2>{tempo_medio}s</h2><p>Tempo médio</p></div>
+        <div class="card"><h2>{tempo_minimo}s</h2><p>Menor tempo</p></div>
+        <div class="card"><h2>{tempo_maximo}s</h2><p>Maior tempo</p></div>
     </div>
 
     <div class="grid">
@@ -485,6 +522,7 @@ canvas {{
                 <th>Tipo</th>
                 <th>Status</th>
                 <th>IP</th>
+                <th>Tempo</th>
                 <th>Detalhes</th>
             </tr>
             {ultimos_eventos_html}
@@ -546,6 +584,7 @@ def evento():
         "tipo": tipo,
         "acao": data.get("acao", "N/A"),
         "status": data.get("status", "N/A"),
+        "tempo_resposta": data.get("tempo_resposta", "N/A"),
         "user_agent": data.get("userAgent", "N/A"),
         "platform": data.get("platform", "N/A"),
         "language": data.get("language", "N/A"),
