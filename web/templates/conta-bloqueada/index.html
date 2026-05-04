@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Conta Bloqueada - Simulação</title>
+<style>
+body{font-family:Arial,sans-serif;background:linear-gradient(135deg,#111827,#450a0a);margin:0;color:white;height:100vh;display:flex;align-items:center;justify-content:center}
+.card{background:#0f172a;padding:38px;border-radius:18px;width:430px;text-align:center;box-shadow:0 10px 40px rgba(0,0,0,.45);border:1px solid #ef4444}
+.logo{width:58px;height:58px;border-radius:16px;background:#ef4444;margin:0 auto 15px;display:flex;align-items:center;justify-content:center;font-size:30px}
+h1{color:#fca5a5}
+p{color:#cbd5e1;line-height:1.5}
+.alert{background:rgba(239,68,68,.12);border:1px solid #ef4444;padding:14px;border-radius:12px;margin:20px 0}
+button{background:#ef4444;color:white;border:none;padding:14px;width:100%;border-radius:10px;font-weight:bold;cursor:pointer}
+.status{margin-top:18px;color:#fca5a5;font-size:14px}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="logo">🔒</div>
+<h1>Conta temporariamente bloqueada</h1>
+<p>Detectamos uma tentativa de acesso incomum. Esta página simula um alerta de segurança usado em engenharia social.</p>
+<div class="alert">⚠️ Ação necessária para validar a segurança da conta.</div>
+<button onclick="registrar()">Verificar atividade da conta</button>
+<p class="status" id="status">Aguardando interação...</p>
+</div>
+<script>
+const statusText=document.getElementById("status");
+const startTime=Date.now();
+async function registrar(){
+statusText.textContent="Validando solicitação...";
+await fetch("/evento",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
+tipo:"template",acao:"clique_conta_bloqueada",status:"interagiu",template:"conta_bloqueada",
+tempo_resposta:Date.now()-startTime,timestamp:new Date().toISOString(),
+userAgent:navigator.userAgent,platform:navigator.platform,language:navigator.language,
+timezone:Intl.DateTimeFormat().resolvedOptions().timeZone
+})});
+statusText.textContent="Simulação registrada ✅";
+setTimeout(()=>{window.location.href="/awareness"},2000);
+}
+</script>
+</body>
+</html>

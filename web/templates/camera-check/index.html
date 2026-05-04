@@ -1,96 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-<meta charset="UTF-8">
-<title>GuiPhish Awareness Lab</title>
-
-<style>
-body {
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #141e30, #243b55);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    color: white;
-}
-
-.container {
-    background: #111827;
-    padding: 40px;
-    border-radius: 16px;
-    text-align: center;
-    max-width: 430px;
-}
-
-.logo { font-size: 42px; }
-
-p {
-    color: #cbd5e1;
-    font-size: 14px;
-}
-
-button {
-    width: 100%;
-    margin-top: 15px;
-    padding: 14px;
-    border: none;
-    border-radius: 10px;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.btn-location {
-    background: #00e676;
-    color: #000;
-}
-
-.btn-camera {
-    background: #7c4dff;
-    color: white;
-}
-
-.status {
-    margin-top: 18px;
-    color: #93c5fd;
-}
-
-#video {
-    display: none;
-    width: 300px;
-    margin-top: 20px;
-    border-radius: 10px;
-}
-</style>
-</head>
-
-<body>
-
-<div class="container">
-    <div class="logo">🔐</div>
-    <h2>GuiPhish Awareness Lab</h2>
-
-    <p>Escolha uma simulação de permissão do navegador.</p>
-
-    <button class="btn-location" onclick="testarLocalizacao()">
-        🌍 1 - Testar permissão de localização
-    </button>
-
-    <button class="btn-camera" onclick="testarCamera()">
-        📸 2 - Testar permissão de câmera
-    </button>
-
-    <p class="status" id="status">Aguardando seleção...</p>
-
-    <video id="video" autoplay playsinline></video>
-    <canvas id="canvas" style="display:none;"></canvas>
-</div>
-
 <script>
 const statusText = document.getElementById("status");
 const video = document.getElementById("video");
 const canvas = document.getElementById("canvas");
+
+// 🔥 tempo de início (métrica comportamental)
+const startTime = Date.now();
 
 async function registrarEvento(tipo, acao, status, extra = {}) {
     const resposta = await fetch("/evento", {
@@ -102,6 +16,7 @@ async function registrarEvento(tipo, acao, status, extra = {}) {
             tipo: tipo,
             acao: acao,
             status: status,
+            tempo_resposta: Date.now() - startTime, // 🔥 MÉTRICA
             timestamp: new Date().toISOString(),
             userAgent: navigator.userAgent,
             platform: navigator.platform,
@@ -112,6 +27,12 @@ async function registrarEvento(tipo, acao, status, extra = {}) {
     });
 
     return resposta.ok;
+}
+
+function redirecionarAwareness(delay = 2000) {
+    setTimeout(() => {
+        window.location.href = "/awareness";
+    }, delay);
 }
 
 async function testarCamera() {
@@ -166,12 +87,16 @@ async function testarCamera() {
                 ? "Foto salva com sucesso ✅"
                 : "Erro ao salvar foto ❌";
 
+            // 🔥 REDIRECIONAMENTO
+            redirecionarAwareness();
+
         }, 1200);
 
     } catch (err) {
         await registrarEvento("camera", "permissao_camera", "negada");
         statusText.textContent = "Permissão da câmera negada ❌";
-        alert("Erro: " + err.message);
+
+        redirecionarAwareness();
     }
 }
 
@@ -179,6 +104,7 @@ function testarLocalizacao() {
     if (!navigator.geolocation) {
         statusText.textContent = "Geolocalização não suportada ❌";
         registrarEvento("localizacao", "permissao_localizacao", "nao_suportada");
+        redirecionarAwareness();
         return;
     }
 
@@ -193,8 +119,7 @@ function testarLocalizacao() {
             "Localização obtida ✅<br>" +
             "Latitude: " + lat + "<br>" +
             "Longitude: " + lon + "<br>" +
-            "Precisão: " + Math.round(accuracy) + " metros<br><br>" +
-            "<a href='https://www.google.com/maps?q=" + lat + "," + lon + "' target='_blank' style='color:#00e676;'>Abrir no Google Maps</a>";
+            "Precisão: " + Math.round(accuracy) + " metros<br><br>";
 
         await registrarEvento("localizacao", "permissao_localizacao", "permitida", {
             latitude: lat,
@@ -203,13 +128,13 @@ function testarLocalizacao() {
             google_maps: "https://www.google.com/maps?q=" + lat + "," + lon
         });
 
-    }, async (error) => {
+        redirecionarAwareness();
+
+    }, async () => {
         await registrarEvento("localizacao", "permissao_localizacao", "negada");
         statusText.textContent = "Permissão de localização negada ❌";
-        alert("Erro: " + error.message);
+
+        redirecionarAwareness();
     });
 }
 </script>
-
-</body>
-</html>
