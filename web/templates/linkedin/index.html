@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>LinkedIn - Simulação</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f3f2ef;
+    margin: 0;
+    color: #1f2937;
+}
+
+.header {
+    background: #ffffff;
+    border-bottom: 1px solid #d1d5db;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logo {
+    background: #0a66c2;
+    color: white;
+    font-weight: bold;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 22px;
+}
+
+.container {
+    max-width: 620px;
+    margin: 45px auto;
+    background: white;
+    border-radius: 14px;
+    padding: 32px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.12);
+    text-align: center;
+}
+
+.badge {
+    color: #0a66c2;
+    font-weight: bold;
+}
+
+h1 {
+    color: #111827;
+}
+
+p {
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.profile-box {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    padding: 18px;
+    border-radius: 12px;
+    margin: 22px 0;
+}
+
+button {
+    background: #0a66c2;
+    color: white;
+    border: none;
+    padding: 14px 18px;
+    width: 100%;
+    border-radius: 999px;
+    font-weight: bold;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.status {
+    margin-top: 18px;
+    color: #0a66c2;
+    font-size: 14px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div class="logo">in</div>
+    <strong>LinkedIn</strong>
+</div>
+
+<div class="container">
+    <p class="badge">Notificação de perfil</p>
+
+    <h1>Alguém visualizou seu perfil</h1>
+
+    <p>
+        Uma nova visualização foi detectada recentemente.
+        Para fins educacionais, esta página simula um cenário comum de engenharia social.
+    </p>
+
+    <div class="profile-box">
+        <strong>👤 Visitante recente</strong>
+        <p>Perfil profissional visualizado nas últimas horas.</p>
+    </div>
+
+    <button onclick="verVisualizacao()">Ver quem visitou meu perfil</button>
+
+    <p class="status" id="status">Aguardando interação...</p>
+</div>
+
+<script>
+const statusText = document.getElementById("status");
+const startTime = Date.now();
+
+async function registrarEvento(tipo, acao, status, extra = {}) {
+    const resposta = await fetch("/evento", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            tipo: tipo,
+            acao: acao,
+            status: status,
+            template: "linkedin",
+            tempo_resposta: Date.now() - startTime,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            language: navigator.language,
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+            ...extra
+        })
+    });
+
+    return resposta.ok;
+}
+
+function redirecionarAwareness(delay = 2200) {
+    setTimeout(() => {
+        window.location.href = "/awareness";
+    }, delay);
+}
+
+async function verVisualizacao() {
+    statusText.textContent = "Processando visualização...";
+
+    await registrarEvento(
+        "template",
+        "clique_linkedin_visualizacao_perfil",
+        "interagiu",
+        {
+            contexto: "perfil_visualizado"
+        }
+    );
+
+    statusText.textContent = "Simulação registrada ✅ Redirecionando para conscientização...";
+    redirecionarAwareness();
+}
+</script>
+
+</body>
+</html>
