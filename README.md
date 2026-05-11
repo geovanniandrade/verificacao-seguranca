@@ -227,8 +227,6 @@ fins educacionais
 
 Nunca utilize sem consentimento.
 ```
-### 🛡️ Aprendizados
-
 ## 🛡️ Aprendizados
 
 - Engenharia social
